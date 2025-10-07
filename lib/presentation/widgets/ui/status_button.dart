@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 
+/// 상태 표시 버튼 위젯
+/// 자율주행, 브레이크 등의 상태를 아이콘과 함께 표시
 class StatusButton extends StatelessWidget {
+  /// 표시할 아이콘
   final IconData icon;
+
+  /// 버튼 하단에 표시될 라벨
   final String label;
+
+  /// 활성화 상태
   final bool isOn;
+
+  /// 활성화 시 색상
   final Color onColor;
 
   const StatusButton({
@@ -30,10 +39,12 @@ class StatusButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 아이콘 컨테이너
           Container(
             width: 45,
             height: 45,
             decoration: BoxDecoration(
+              // 상태에 따른 색상 변경
               color: isOn ? onColor : Colors.grey[800],
               shape: BoxShape.circle,
             ),
@@ -44,6 +55,7 @@ class StatusButton extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+          // 라벨 텍스트
           Text(
             label,
             style: TextStyle(
@@ -57,7 +69,10 @@ class StatusButton extends StatelessWidget {
   }
 }
 
+/// 급가속/급정거 상태 표시 버튼
+/// 특수한 동작으로 인해 별도 위젯으로 구현
 class HarshDrivingButton extends StatelessWidget {
+  /// 급가속/급정거 상태 (-1: 급정거, 0: 정상, 1: 급가속)
   final int harshDriving;
 
   const HarshDrivingButton({
@@ -67,9 +82,11 @@ class HarshDrivingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 상태 확인
     bool isAccel = harshDriving > 0;
     bool isDecel = harshDriving < 0;
 
+    // 상태에 따른 색상과 텍스트 설정
     Color alertColor;
     String alertText;
 
@@ -98,6 +115,7 @@ class HarshDrivingButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 상태 표시 원
           Container(
             width: 45,
             height: 45,
@@ -107,6 +125,7 @@ class HarshDrivingButton extends StatelessWidget {
             ),
             child: alertText.isNotEmpty
                 ? Center(
+              // 급가속/급정거 텍스트 표시
               child: Text(
                 alertText,
                 style: TextStyle(
@@ -117,12 +136,14 @@ class HarshDrivingButton extends StatelessWidget {
               ),
             )
                 : Icon(
+              // 정상 상태일 때 체크 아이콘
               Icons.check_circle_outline,
               color: Colors.white,
               size: 24,
             ),
           ),
           const SizedBox(height: 8),
+          // 라벨
           Text(
             '급가속/급정거',
             style: TextStyle(

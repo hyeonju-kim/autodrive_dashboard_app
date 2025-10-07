@@ -16,7 +16,10 @@ dependencies:
   mqtt_client: ^9.8.1
   web_socket_channel: ^2.4.0  # 추가
   typed_data: ^1.3.2  # 추가
-
+  # 상태 관리
+  provider: ^6.1.1
+  # UI
+  cupertino_icons: ^1.0.6
 dev_dependencies:
   flutter_test:
     sdk: flutter
