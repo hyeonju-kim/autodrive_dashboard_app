@@ -1,6 +1,15 @@
 import 'dart:ui';
 
 class AppConstants {
+  // ===== 차량 정보 =====
+  /// 화성 차량 정보
+  static const String marsVehicleNumber = '80허3342';
+  static const String marsVehicleId = 'f4FwwkGR';
+
+  /// 제주 차량 정보
+  static const String jejuVehicleNumber = '00임4427';
+  static const String jejuVehicleId = 'VEHICLEID';
+
   // Janus 서버 설정
   static const String janusServer = 'http://123.143.232.180:25800/janus';
 
@@ -11,6 +20,10 @@ class AppConstants {
   static const String mqttUsername = 'socket';
   static const String mqttPassword = 'thzpt!@#';
   static const String mqttTopic = '/topic/f4FwwkGR';
+  /// 차량 데이터를 수신할 MQTT 토픽 (화성)
+  static const String mqttTopicMars = '/topic/f4FwwkGR';
+  /// 차량 데이터를 수신할 MQTT 토픽 (제주)
+  static const String mqttTopicJeju = '/topic/VEHICLEID';
 
   // ICE 서버 설정
   static const List<String> stunServers = [
@@ -25,6 +38,8 @@ class AppConstants {
   // 스트림 ID
   static const int stream1Id = 11;
   static const int stream2Id = 12;
+  static const int stream3Id = 13;
+  static const int stream4Id = 14;
 
   // 타이머 설정
   static const Duration pollInterval = Duration(milliseconds: 500);

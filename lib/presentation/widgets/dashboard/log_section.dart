@@ -1,3 +1,5 @@
+// lib/presentation/widgets/dashboard/log_section.dart
+
 import 'package:flutter/material.dart';
 import '../../../core/utils/logger.dart';
 
@@ -18,17 +20,14 @@ class LogSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      height: showLogs ? 400 : 0,
-      curve: Curves.easeInOut,
-      child: showLogs
-          ? Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        color: Colors.black87,
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: Colors.black87,
+      child: Container(
+        height: 400, // 고정 높이
         child: Column(
           children: [
             // 헤더 영역
@@ -105,8 +104,7 @@ class LogSection extends StatelessWidget {
             ),
           ],
         ),
-      )
-          : const SizedBox.shrink(),
+      ),
     );
   }
 }

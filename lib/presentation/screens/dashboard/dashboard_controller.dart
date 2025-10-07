@@ -83,6 +83,9 @@ class DashboardController extends ChangeNotifier {
     // 로그 리스너 등록
     _logListener = () => notifyListeners();
     Logger.addListener(_logListener!);
+
+    // 자동으로 모든 스트림 연결
+    await connectAllStreams();
   }
 
   /// 시계 시작

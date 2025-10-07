@@ -1,3 +1,5 @@
+// lib/presentation/widgets/common/stream_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -13,15 +15,15 @@ class StreamCard extends StatelessWidget {
   /// 연결 상태
   final bool isConnected;
 
-  /// 재연결 콜백
-  final VoidCallback onReconnect;
+  /// 재연결 콜백 (제거해도 되지만 타입 호환성을 위해 유지)
+  final VoidCallback? onReconnect;
 
   const StreamCard({
     super.key,
     required this.title,
     required this.renderer,
     required this.isConnected,
-    required this.onReconnect,
+    this.onReconnect, // optional로 변경
   });
 
   @override
@@ -96,19 +98,7 @@ class StreamCard extends StatelessWidget {
                 ),
               ),
 
-              // 상단 우측: 새로고침 버튼
-              Positioned(
-                top: 12,
-                right: 12,
-                child: IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
-                  onPressed: onReconnect,
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.black54,
-                    padding: const EdgeInsets.all(8),
-                  ),
-                ),
-              ),
+              // 새로고침 버튼 제거됨
             ],
           ),
         ),

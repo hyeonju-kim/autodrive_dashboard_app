@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:janus_streaming_app/presentation/screens/main_navigation_screen.dart';
 import 'core/config/theme_config.dart';
 import 'presentation/screens/dashboard/dashboard_screen.dart';
 
@@ -12,7 +13,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Janus Streaming',
       theme: ThemeConfig.darkTheme, // 앱 전체에 적용될 다크 테마
-      home: const DashboardScreen(), // 앱 시작 시 표시될 첫 화면
+      home: const MainNavigationScreen(), // DashboardScreen 대신 MainNavigationScreen으로 변경
     );
   }
 }

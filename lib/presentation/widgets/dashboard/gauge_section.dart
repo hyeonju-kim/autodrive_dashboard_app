@@ -20,7 +20,7 @@ class GaugeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(2), // 적절한 패딩
       decoration: BoxDecoration(
         color: AppConstants.backgroundSecondary,
         borderRadius: BorderRadius.circular(16),
@@ -39,7 +39,7 @@ class GaugeSection extends StatelessWidget {
           GaugeWidget(
             label: 'SPEED',
             value: speedKmh.toStringAsFixed(0),
-            unit: 'KM/H',
+            unit: 'km/h',
             percentage: (speedKmh / AppConstants.speedMaxKmh).clamp(0.0, 1.0),
             color: Colors.cyan,
             icon: Icons.speed,

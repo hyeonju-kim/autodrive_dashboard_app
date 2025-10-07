@@ -52,92 +52,78 @@ class TurnSignalWidget extends StatelessWidget {
           emergencyColor = Colors.red.withOpacity(opacity);
         }
 
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-          decoration: BoxDecoration(
-            color: const Color(0xFF0d1419),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // 좌측 방향등
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.arrow_back_rounded,
+                    size: 36,
+                    color: leftColor,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    leftText,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: leftTextColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // 좌측 방향등
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.arrow_back_rounded,
-                      size: 36,
-                      color: leftColor,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      leftText,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: leftTextColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            // 중앙 비상등
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: emergencyColor,
+                shape: BoxShape.circle,
+                // 비상등 활성화 시 빛나는 효과
+                boxShadow: turnSignal == 3
+                    ? [
+                  BoxShadow(
+                    color: Colors.red.withOpacity(opacity * 0.5),
+                    blurRadius: 15,
+                    spreadRadius: 3,
+                  ),
+                ]
+                    : [],
               ),
-              // 중앙 비상등
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: emergencyColor,
-                  shape: BoxShape.circle,
-                  // 비상등 활성화 시 빛나는 효과
-                  boxShadow: turnSignal == 3
-                      ? [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(opacity * 0.5),
-                      blurRadius: 15,
-                      spreadRadius: 3,
-                    ),
-                  ]
-                      : [],
-                ),
-                child: Icon(
-                  Icons.warning,
-                  size: 28,
-                  color: turnSignal == 3 ? Colors.white : Colors.grey[700],
-                ),
+              child: Icon(
+                Icons.warning,
+                size: 28,
+                color: turnSignal == 3 ? Colors.white : Colors.grey[700],
               ),
-              // 우측 방향등
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 36,
-                      color: rightColor,
+            ),
+            // 우측 방향등
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 36,
+                    color: rightColor,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    rightText,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: rightTextColor,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      rightText,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: rightTextColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
