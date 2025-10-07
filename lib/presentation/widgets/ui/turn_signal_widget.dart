@@ -69,7 +69,7 @@ class TurnSignalWidget extends StatelessWidget {
                   Text(
                     leftText,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       color: leftTextColor,
                       fontWeight: FontWeight.w500,
                     ),
@@ -115,7 +115,7 @@ class TurnSignalWidget extends StatelessWidget {
                   Text(
                     rightText,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       color: rightTextColor,
                       fontWeight: FontWeight.w500,
                     ),

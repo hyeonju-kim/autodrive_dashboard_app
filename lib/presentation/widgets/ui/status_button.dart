@@ -41,7 +41,7 @@ class StatusButton extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 9,
+            fontSize: 12,
             color: isOn ? Colors.white70 : Colors.white38,
           ),
         ),
@@ -94,7 +94,7 @@ class HarshDrivingButton extends StatelessWidget {
         Text(
           isAccel ? '급가속' : (isDecel ? '급정거' : '급가속/급정거'),
           style: TextStyle(
-            fontSize: 9,
+            fontSize: 12,
             color: alertColor == Colors.grey[600] ? Colors.white38 : alertColor,
           ),
         ),

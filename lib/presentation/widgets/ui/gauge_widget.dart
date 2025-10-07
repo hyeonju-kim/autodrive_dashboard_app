@@ -47,7 +47,7 @@ class GaugeWidget extends StatelessWidget {
           Text(
             '$label ($unit)',
             style: const TextStyle(
-              fontSize: 9,
+              fontSize: 12,
               color: Colors.white54,
               letterSpacing: 0.5,
               fontWeight: FontWeight.w500,

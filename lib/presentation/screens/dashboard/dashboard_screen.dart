@@ -4,6 +4,7 @@ import '../../../core/config/app_constants.dart';
 import '../../widgets/dashboard/gauge_section.dart';
 import '../../widgets/dashboard/log_section.dart';
 import '../../widgets/common/stream_card.dart';
+import '../../widgets/common/alert_banner.dart';
 import '../../widgets/dashboard/vehicle_status_section.dart';
 import 'dashboard_controller.dart';
 
@@ -79,7 +80,28 @@ class _DashboardScreenState extends State<DashboardScreen>
       child: Scaffold(
         backgroundColor: AppConstants.backgroundPrimary,
         appBar: _buildAppBar(),
-        body: _buildBody(),
+        body: Stack(
+          children: [
+            _buildBody(),
+            // 알림 배너 추가
+            Consumer<DashboardController>(
+              builder: (context, controller, child) {
+                if (controller.currentAlert != null) {
+                  return Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: AlertBanner(
+                      alert: controller.currentAlert!,
+                      onDismiss: controller.dismissAlert,
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -172,7 +194,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   child: Text(
                     '${controller.vehicleNumber} (${controller.vehicleId})',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 17,
                       fontWeight: FontWeight.w500,
                       color: Colors.white.withOpacity(0.8),
                     ),
