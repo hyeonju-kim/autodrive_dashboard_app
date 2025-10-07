@@ -1,3 +1,5 @@
+// lib/presentation/screens/dashboard/dashboard_controller.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,82 +7,68 @@ import '../../../core/config/app_constants.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/models/vehicle_data.dart';
 import '../../../data/services/mqtt_service.dart';
-import '../../../data/repositories/stream_repository.dart';
+import '../../../data/services/janus_service.dart';
 
 /// 대시보드 화면의 비즈니스 로직을 관리하는 컨트롤러
-/// ChangeNotifier를 상속받아 UI에 상태 변경을 알림
+/// 화성/제주 둘 다 사용 가능
 class DashboardController extends ChangeNotifier {
-  // ===== 서비스 및 리포지토리 =====
-  /// MQTT 서비스 인스턴스
+  // ===== 지역 구분 =====
+  final bool isMars; // true: 화성, false: 제주
+
+  // ===== 서비스 =====
   final MqttService _mqttService = MqttService();
+  late final JanusService _stream1Service;
+  late final JanusService _stream2Service;
 
-  /// 스트림 리포지토리 인스턴스
-  final StreamRepository _streamRepository = StreamRepository();
-
-  // ===== 타이머 =====
-  /// 시계 업데이트 타이머
+  Timer? _pollTimer;
   Timer? _clockTimer;
 
   // ===== 상태 변수 =====
-  /// 현재 시간 문자열
   String _currentTime = '';
-
-  /// 새로고침 진행 중 여부
   bool _isRefreshing = false;
-
-  /// 로그 표시 여부
   bool _showLogs = false;
-
-  /// 현재 차량 데이터
   VehicleData? _vehicleData;
-
-  /// MQTT 연결 상태
   bool _isMqttConnected = false;
 
   // ===== 구독 =====
-  /// MQTT 차량 데이터 구독
   StreamSubscription<VehicleData>? _vehicleDataSubscription;
-
-  /// MQTT 연결 상태 구독
   StreamSubscription<bool>? _mqttConnectionSubscription;
-
-  /// 로그 변경 리스너
   VoidCallback? _logListener;
 
   // ===== Getters =====
-  /// 현재 시간
   String get currentTime => _currentTime;
-
-  /// 새로고침 상태
   bool get isRefreshing => _isRefreshing;
-
-  /// 로그 표시 상태
   bool get showLogs => _showLogs;
-
-  /// 차량 데이터
   VehicleData? get vehicleData => _vehicleData;
-
-  /// MQTT 연결 상태
   bool get isMqttConnected => _isMqttConnected;
 
-  /// 스트림 리포지토리 (UI에서 직접 접근용)
-  StreamRepository get streamRepository => _streamRepository;
+  // 지역별 정보
+  String get vehicleNumber => isMars ? AppConstants.marsVehicleNumber : AppConstants.jejuVehicleNumber;
+  String get vehicleId => isMars ? AppConstants.marsVehicleId : AppConstants.jejuVehicleId;
+  String get mqttTopic => isMars ? AppConstants.mqttTopicMars : AppConstants.mqttTopicJeju;
+  int get stream1Id => isMars ? AppConstants.stream1Id : AppConstants.jejuStream1Id;
+  int get stream2Id => isMars ? AppConstants.stream2Id : AppConstants.jejuStream2Id;
+
+  JanusService get stream1 => _stream1Service;
+  JanusService get stream2 => _stream2Service;
+
+  DashboardController({required this.isMars}) {
+    // 지역별 스트림 ID로 JanusService 초기화
+    _stream1Service = JanusService(streamId: stream1Id);
+    _stream2Service = JanusService(streamId: stream2Id);
+  }
 
   /// 컨트롤러 초기화
-  /// 서비스들을 초기화하고 연결을 시작
   Future<void> init() async {
-    Logger.log('🚀 대시보드 컨트롤러 초기화 시작');
+    Logger.log('🚀 ${isMars ? "화성" : "제주"} 대시보드 컨트롤러 초기화 시작');
 
     // 비디오 렌더러 초기화
-    await _streamRepository.init();
+    await _stream1Service.initRenderer();
+    await _stream2Service.initRenderer();
 
-    // 시계 시작
     _startClock();
-
-    // MQTT 연결
     await _connectMqtt();
 
-    // 로그 리스너 등록
     _logListener = () => notifyListeners();
     Logger.addListener(_logListener!);
 
@@ -88,8 +76,6 @@ class DashboardController extends ChangeNotifier {
     await connectAllStreams();
   }
 
-  /// 시계 시작
-  /// 매초마다 현재 시간을 업데이트
   void _startClock() {
     _updateTime();
     _clockTimer = Timer.periodic(AppConstants.clockUpdateInterval, (timer) {
@@ -97,20 +83,15 @@ class DashboardController extends ChangeNotifier {
     });
   }
 
-  /// 현재 시간 업데이트
   void _updateTime() {
     _currentTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     notifyListeners();
   }
 
-  /// MQTT 서비스 연결
-  /// 차량 데이터 스트림을 구독하고 상태 업데이트
   Future<void> _connectMqtt() async {
     try {
-      // MQTT 연결
-      await _mqttService.connect();
+      await _mqttService.connectToTopic(mqttTopic);
 
-      // 차량 데이터 스트림 구독
       _vehicleDataSubscription = _mqttService.vehicleDataStream.listen(
             (data) {
           _vehicleData = data;
@@ -118,7 +99,6 @@ class DashboardController extends ChangeNotifier {
         },
       );
 
-      // 연결 상태 스트림 구독
       _mqttConnectionSubscription = _mqttService.connectionStream.listen(
             (connected) {
           _isMqttConnected = connected;
@@ -130,24 +110,33 @@ class DashboardController extends ChangeNotifier {
     }
   }
 
-  /// 모든 스트림 연결
-  /// 두 카메라 스트림을 동시에 연결
   Future<void> connectAllStreams() async {
-    await _streamRepository.connectAll();
+    try {
+      Logger.log('=== ${isMars ? "화성" : "제주"} 스트림 연결 시작 ===');
+      await Future.wait([
+        _stream1Service.connect(),
+        _stream2Service.connect(),
+      ]);
+      _startPolling();
+    } catch (e) {
+      Logger.log('❌ 스트림 연결 실패: $e');
+    }
   }
 
-  /// 첫 번째 스트림 재연결
-  Future<void> reconnectStream1() async {
-    await _streamRepository.connectStream1();
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(AppConstants.pollInterval, (timer) {
+      _pollEvents();
+    });
   }
 
-  /// 두 번째 스트림 재연결
-  Future<void> reconnectStream2() async {
-    await _streamRepository.connectStream2();
+  Future<void> _pollEvents() async {
+    await Future.wait([
+      _stream1Service.pollEvents(),
+      _stream2Service.pollEvents(),
+    ]);
   }
 
-  /// 전체 새로고침
-  /// 모든 연결을 재시작
   Future<void> refresh() async {
     if (_isRefreshing) return;
 
@@ -156,46 +145,38 @@ class DashboardController extends ChangeNotifier {
 
     Logger.log('🔄 새로고침 시작');
 
-    // 기존 연결 해제
-    _streamRepository.disconnect();
+    _pollTimer?.cancel();
+    _stream1Service.peerConnection?.close();
+    _stream2Service.peerConnection?.close();
 
-    // 잠시 대기 (연결 정리를 위해)
     await Future.delayed(const Duration(milliseconds: 500));
-
-    // 재연결
     await connectAllStreams();
 
     _isRefreshing = false;
     notifyListeners();
   }
 
-  /// 로그 표시 토글
   void toggleLogs() {
     _showLogs = !_showLogs;
     notifyListeners();
   }
 
-  /// 리소스 정리
-  /// 모든 타이머, 구독, 서비스를 정리
   @override
   void dispose() {
-    Logger.log('🛑 대시보드 컨트롤러 종료');
+    Logger.log('🛑 ${isMars ? "화성" : "제주"} 대시보드 컨트롤러 종료');
 
-    // 타이머 정리
     _clockTimer?.cancel();
-
-    // 구독 정리
+    _pollTimer?.cancel();
     _vehicleDataSubscription?.cancel();
     _mqttConnectionSubscription?.cancel();
 
-    // 로그 리스너 제거
     if (_logListener != null) {
       Logger.removeListener(_logListener!);
     }
 
-    // 서비스 정리
     _mqttService.dispose();
-    _streamRepository.dispose();
+    _stream1Service.dispose();
+    _stream2Service.dispose();
 
     super.dispose();
   }

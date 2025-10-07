@@ -8,6 +8,8 @@ import '../models/vehicle_data.dart';
 
 /// MQTT 통신을 관리하는 서비스 클래스
 /// 차량의 실시간 데이터를 MQTT 브로커로부터 수신
+// lib/data/services/mqtt_service.dart
+
 class MqttService {
   /// MQTT 클라이언트 인스턴스
   MqttClient? _client;
@@ -19,15 +21,18 @@ class MqttService {
   /// MQTT 연결 상태 스트림 컨트롤러
   final _connectionController = StreamController<bool>.broadcast();
 
-  /// 차량 데이터를 방출하는 스트림
+  String? _currentTopic; // 현재 구독 중인 토픽
+
   Stream<VehicleData> get vehicleDataStream => _vehicleDataController.stream;
 
   /// MQTT 연결 상태를 방출하는 스트림
   Stream<bool> get connectionStream => _connectionController.stream;
 
-  /// MQTT 브로커에 연결
-  /// WebSocket을 통해 MQTT 브로커와 연결을 설정하고
-  /// 차량 데이터 토픽을 구독
+  Future<void> connectToTopic(String topic) async {
+    _currentTopic = topic;
+    await connect();
+  }
+
   Future<void> connect() async {
     try {
       // 고유한 클라이언트 ID 생성 (타임스탬프 사용)
@@ -81,9 +86,10 @@ class MqttService {
     Logger.log('✅ MQTT 연결 성공');
     _connectionController.add(true);
 
-    // 차량 데이터 토픽 구독
-    _client!.subscribe(AppConstants.mqttTopic, MqttQos.atLeastOnce);
-    Logger.log('✅ 토픽 구독 완료: ${AppConstants.mqttTopic}');
+    if (_currentTopic != null) {
+      _client!.subscribe(_currentTopic!, MqttQos.atLeastOnce);
+      Logger.log('✅ 토픽 구독 완료: $_currentTopic');
+    }
 
     // 메시지 수신 리스너 설정
     _client!.updates!.listen((messages) {

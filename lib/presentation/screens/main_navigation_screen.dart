@@ -63,11 +63,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.location_city),
+              icon: Icon(Icons.landscape),
               label: '제주',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.rocket_launch),
+              icon: Icon(Icons.home_work),
               label: '화성',
             ),
             BottomNavigationBarItem(

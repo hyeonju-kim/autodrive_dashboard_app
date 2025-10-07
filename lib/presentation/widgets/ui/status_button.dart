@@ -1,3 +1,5 @@
+// lib/presentation/widgets/ui/status_button.dart
+
 import 'package:flutter/material.dart';
 
 /// 상태 표시 버튼 위젯
@@ -25,46 +27,25 @@ class StatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 70,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1a2332),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 아이콘만 표시 (박스 제거)
+        Icon(
+          icon,
+          color: isOn ? onColor : Colors.grey[600],
+          size: 28,
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 아이콘 컨테이너
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              // 상태에 따른 색상 변경
-              color: isOn ? onColor : Colors.grey[800],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+        const SizedBox(height: 4),
+        // 라벨 텍스트
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            color: isOn ? Colors.white70 : Colors.white38,
           ),
-          const SizedBox(height: 8),
-          // 라벨 텍스트
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 9,
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -88,71 +69,36 @@ class HarshDrivingButton extends StatelessWidget {
 
     // 상태에 따른 색상과 텍스트 설정
     Color alertColor;
-    String alertText;
+    IconData alertIcon;
 
     if (isAccel) {
       alertColor = Colors.orange;
-      alertText = '급가속';
+      alertIcon = Icons.speed;
     } else if (isDecel) {
       alertColor = Colors.red;
-      alertText = '급정거';
+      alertIcon = Icons.do_not_disturb_on;
     } else {
-      alertColor = Colors.grey[800]!;
-      alertText = '';
+      alertColor = Colors.grey[600]!;
+      alertIcon = Icons.check_circle_outline;
     }
 
-    return Container(
-      width: 70,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1a2332),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          alertIcon,
+          color: alertColor,
+          size: 28,
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 상태 표시 원
-          Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: alertColor,
-              shape: BoxShape.circle,
-            ),
-            child: alertText.isNotEmpty
-                ? Center(
-              // 급가속/급정거 텍스트 표시
-              child: Text(
-                alertText,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            )
-                : Icon(
-              // 정상 상태일 때 체크 아이콘
-              Icons.check_circle_outline,
-              color: Colors.white,
-              size: 24,
-            ),
+        const SizedBox(height: 4),
+        Text(
+          isAccel ? '급가속' : (isDecel ? '급정거' : '급가속/급정거'),
+          style: TextStyle(
+            fontSize: 9,
+            color: alertColor == Colors.grey[600] ? Colors.white38 : alertColor,
           ),
-          const SizedBox(height: 8),
-          // 라벨
-          Text(
-            '급가속/급정거',
-            style: TextStyle(
-              fontSize: 8,
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

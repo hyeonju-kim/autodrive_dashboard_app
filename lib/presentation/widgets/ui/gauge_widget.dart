@@ -1,3 +1,5 @@
+// lib/presentation/widgets/ui/gauge_widget.dart
+
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -32,52 +34,46 @@ class GaugeWidget extends StatelessWidget {
     required this.icon,
   });
 
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,  // 적절한 크기로 조정
-      height: 120, // 적절한 크기로 조정
-      child: Stack(
-        alignment: Alignment.center,
+      width: 90,
+      height: 100, // 높이 축소
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 게이지 원형 그래프 그리기
-          CustomPaint(
-            size: const Size(110, 110), // 적절한 크기로 조정
-            painter: GaugePainter(
-              percentage: percentage,
-              color: color,
+          // 라벨 + 단위 (상단)
+          Text(
+            '$label ($unit)',
+            style: const TextStyle(
+              fontSize: 9,
+              color: Colors.white54,
+              letterSpacing: 0.5,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          // 중앙 텍스트 영역
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(height: 4),
+          // 게이지와 값
+          Stack(
+            alignment: Alignment.center,
             children: [
-              // 현재 값 표시
+              // 게이지 원형 그래프
+              CustomPaint(
+                size: const Size(80, 80),
+                painter: GaugePainter(
+                  percentage: percentage,
+                  color: color,
+                ),
+              ),
+              // 중앙 값만 크게 표시
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: 32, // 36에서 약간 축소
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: color,
                   fontFamily: 'monospace',
-                ),
-              ),
-              // 단위 표시
-              Text(
-                unit,
-                style: const TextStyle(
-                  fontSize: 13, // 14에서 약간 축소
-                  color: Colors.white70,
-                ),
-              ),
-              const SizedBox(height: 2),
-              // 라벨 표시
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 10, // 11에서 약간 축소
-                  color: Colors.white54,
-                  letterSpacing: 1.0,
                 ),
               ),
             ],
@@ -113,45 +109,56 @@ class GaugePainter extends CustomPainter {
     final backgroundPaint = Paint()
       ..color = Colors.white.withOpacity(0.1)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 8; // 적절한 두께
+      ..strokeWidth = 6; // 약간 얇게
 
     // 배경 호 그리기
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius - 8),
+      Rect.fromCircle(center: center, radius: radius - 6),
       startAngle,
       totalAngle,
       false,
       backgroundPaint,
     );
 
-    // 눈금 그리기 (40개)
-    const int tickCount = 40;
+    // 눈금 그리기 (30개로 축소)
+    const int tickCount = 30;
     for (int i = 0; i <= tickCount; i++) {
       final angle = startAngle + (totalAngle * i / tickCount);
 
       // 주요 눈금(5개마다)은 길게, 나머지는 짧게
       final isMainTick = i % 5 == 0;
-      final tickLength = isMainTick ? 8.0 : 5.0;
+      final tickLength = isMainTick ? 6.0 : 3.0;
 
       // 눈금 시작점과 끝점 계산
-      final x1 = center.dx + (radius - 15) * math.cos(angle);
-      final y1 = center.dy + (radius - 15) * math.sin(angle);
-      final x2 = center.dx + (radius - 15 + tickLength) * math.cos(angle);
-      final y2 = center.dy + (radius - 15 + tickLength) * math.sin(angle);
+      final x1 = center.dx + (radius - 12) * math.cos(angle);
+      final y1 = center.dy + (radius - 12) * math.sin(angle);
+      final x2 = center.dx + (radius - 12 + tickLength) * math.cos(angle);
+      final y2 = center.dy + (radius - 12 + tickLength) * math.sin(angle);
 
       final tickPaint = Paint()
-        ..color = Colors.white.withOpacity(isMainTick ? 0.3 : 0.2)
-        ..strokeWidth = isMainTick ? 1.5 : 1.0;
+        ..color = Colors.white.withOpacity(isMainTick ? 0.25 : 0.15)
+        ..strokeWidth = isMainTick ? 1.2 : 0.8;
 
       canvas.drawLine(Offset(x1, y1), Offset(x2, y2), tickPaint);
     }
 
     // 진행률 표시 원호 그리기
     if (percentage > 0) {
+      // 그라데이션 효과 추가
+      final gradient = SweepGradient(
+        colors: [
+          color.withOpacity(0.3),
+          color,
+        ],
+        stops: const [0.0, 1.0],
+        startAngle: startAngle,
+        endAngle: startAngle + totalAngle,
+      );
+
       final progressPaint = Paint()
-        ..color = color
+        ..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius - 6))
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
+        ..strokeWidth = 6
         ..strokeCap = StrokeCap.round;
 
       // 진행률에 따른 호의 각도 계산
@@ -159,26 +166,17 @@ class GaugePainter extends CustomPainter {
 
       // 호 그리기
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius - 8),
+        Rect.fromCircle(center: center, radius: radius - 6),
         startAngle,
         sweepAngle,
         false,
         progressPaint,
       );
 
-      // 시작점에 원형 캡 추가
-      final startX = center.dx + (radius - 8) * math.cos(startAngle);
-      final startY = center.dy + (radius - 8) * math.sin(startAngle);
-      canvas.drawCircle(
-        Offset(startX, startY),
-        4,
-        Paint()..color = color,
-      );
-
-      // 끝점에 원형 캡 추가
+      // 끝점에만 원형 캡 추가 (더 깔끔한 모습)
       final endAngle = startAngle + sweepAngle;
-      final endX = center.dx + (radius - 8) * math.cos(endAngle);
-      final endY = center.dy + (radius - 8) * math.sin(endAngle);
+      final endX = center.dx + (radius - 6) * math.cos(endAngle);
+      final endY = center.dy + (radius - 6) * math.sin(endAngle);
       canvas.drawCircle(
         Offset(endX, endY),
         4,
@@ -189,7 +187,6 @@ class GaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(GaugePainter oldDelegate) {
-    // percentage가 변경되면 다시 그리기
     return oldDelegate.percentage != percentage;
   }
 }

@@ -20,7 +20,7 @@ class GaugeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(2), // 적절한 패딩
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: AppConstants.backgroundSecondary,
         borderRadius: BorderRadius.circular(16),
@@ -35,23 +35,26 @@ class GaugeSection extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // 속도 게이지
-          GaugeWidget(
-            label: 'SPEED',
-            value: speedKmh.toStringAsFixed(0),
-            unit: 'km/h',
-            percentage: (speedKmh / AppConstants.speedMaxKmh).clamp(0.0, 1.0),
-            color: Colors.cyan,
-            icon: Icons.speed,
+          Expanded(
+            child: GaugeWidget(
+              label: 'SPEED',
+              value: speedKmh.toStringAsFixed(0),
+              unit: 'km/h',  // 소문자로 변경
+              percentage: (speedKmh / AppConstants.speedMaxKmh).clamp(0.0, 1.0),
+              color: Colors.cyan,
+              icon: Icons.speed,
+            ),
           ),
-          // 배터리 게이지
-          GaugeWidget(
-            label: 'BATTERY',
-            value: batteryPercent.toStringAsFixed(0),
-            unit: '%',
-            percentage: batteryPercent / 100,
-            color: Colors.green,
-            icon: Icons.battery_charging_full,
+          const SizedBox(width: 8),
+          Expanded(
+            child: GaugeWidget(
+              label: 'BATTERY',
+              value: batteryPercent.toStringAsFixed(0),
+              unit: '%',
+              percentage: batteryPercent / 100,
+              color: Colors.green,
+              icon: Icons.battery_charging_full,
+            ),
           ),
         ],
       ),

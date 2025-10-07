@@ -35,11 +35,20 @@ class AppConstants {
   static const String turnUsername = 'platform';
   static const String turnCredential = 'Abacus0131!';
 
-  // 스트림 ID
+  // ===== 스트림 식별자 =====
+  /// 화성 - 첫 번째 카메라 스트림 ID
   static const int stream1Id = 11;
+
+  /// 화성 - 두 번째 카메라 스트림 ID
   static const int stream2Id = 12;
-  static const int stream3Id = 13;
-  static const int stream4Id = 14;
+
+  /// 제주 - 첫 번째 카메라 스트림 ID
+  // static const int jejuStream1Id = 13;
+  static const int jejuStream1Id = 11;
+
+  /// 제주 - 두 번째 카메라 스트림 ID
+  // static const int jejuStream2Id = 14;
+  static const int jejuStream2Id = 12;
 
   // 타이머 설정
   static const Duration pollInterval = Duration(milliseconds: 500);

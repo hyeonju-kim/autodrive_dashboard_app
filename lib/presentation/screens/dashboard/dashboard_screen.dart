@@ -10,7 +10,8 @@ import 'dashboard_controller.dart';
 /// 자율주행 관제 대시보드 메인 화면
 /// Provider 패턴을 사용하여 상태 관리
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final bool isMars; // true: 화성, false: 제주
+  const DashboardScreen({super.key, this.isMars = true}); // 기본값: 화성
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -31,8 +32,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   void initState() {
     super.initState();
 
-    // 컨트롤러 초기화
-    _controller = DashboardController();
+    // 지역별 컨트롤러 생성
+    _controller = DashboardController(isMars: widget.isMars);
     _controller.init();
 
     // 깜빡임 애니메이션 설정 (0.5초 주기)
@@ -88,24 +89,45 @@ class _DashboardScreenState extends State<DashboardScreen>
     return AppBar(
       title: Consumer<DashboardController>(
         builder: (context, controller, child) {
-          return Column(
+          return Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // 차량 정보 표시
-              Text(
-                '${AppConstants.marsVehicleNumber} (${AppConstants.marsVehicleId})',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
+              Icon(
+                controller.isMars ? Icons.home_work : Icons.landscape,
+                color: controller.isMars ? Colors.orange : Colors.blue,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '자율주행 관제 대시보드',
+                style: TextStyle(
                   fontSize: 18,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-              // 현재 시간
-              Text(
-                controller.currentTime,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.white70,
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: controller.isMars
+                      ? Colors.orange.withOpacity(0.2)
+                      : Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: controller.isMars
+                        ? Colors.orange.withOpacity(0.5)
+                        : Colors.blue.withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  controller.isMars ? '화성' : '제주',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: controller.isMars ? Colors.orange : Colors.blue,
+                  ),
                 ),
               ),
             ],
@@ -117,11 +139,11 @@ class _DashboardScreenState extends State<DashboardScreen>
       backgroundColor: AppConstants.backgroundSecondary,
     );
   }
-  /// 메인 바디 빌드
+
+
   Widget _buildBody() {
     return Consumer<DashboardController>(
       builder: (context, controller, child) {
-        // 차량 데이터 추출 (null safe)
         final vehicleData = controller.vehicleData;
         final speedKmh = vehicleData?.speedKmh ?? 0.0;
         final batteryPercent = vehicleData?.batteryGaugePercent ?? 0.0;
@@ -130,96 +152,129 @@ class _DashboardScreenState extends State<DashboardScreen>
           onRefresh: controller.refresh,
           color: Colors.blue,
           backgroundColor: Colors.grey[800],
-          child: ListView(
-            controller: _scrollController,
-            padding: const EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 16,
-              bottom: 80, // 네비게이션 바 공간
-            ),
-            physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
             children: [
-              // 게이지 섹션
-              GaugeSection(
-                speedKmh: speedKmh,
-                batteryPercent: batteryPercent,
-              ),
-              const SizedBox(height: 12),
-
-              // 통합된 차량 상태 섹션
-              VehicleStatusSection(
-                turnSignal: vehicleData?.turnSignal ?? 0,
-                blinkAnimation: _blinkController,
-                isAutoDrive: vehicleData?.operationModeAuto ?? false,
-                isBraking: vehicleData?.brakePedal ?? false,
-                isBrushOn: vehicleData?.blowerRun ?? false,
-                harshDriving: vehicleData?.harshDriving ?? 0,
-              ),
-              const SizedBox(height: 12),
-
-              // 스트림 1 (전방 카메라)
-              StreamBuilder<bool>(
-                stream: controller.streamRepository.stream1.connectionStream,
-                initialData: false,
-                builder: (context, snapshot) {
-                  return StreamCard(
-                    title: 'Stream 11',
-                    renderer: controller.streamRepository.stream1.renderer,
-                    isConnected: snapshot.data ?? false,
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-
-              // 스트림 2 (측면 카메라)
-              StreamBuilder<bool>(
-                stream: controller.streamRepository.stream2.connectionStream,
-                initialData: false,
-                builder: (context, snapshot) {
-                  return StreamCard(
-                    title: 'Stream 12',
-                    renderer: controller.streamRepository.stream2.renderer,
-                    isConnected: snapshot.data ?? false,
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // 로그 버튼
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: controller.toggleLogs,
-                  icon: Icon(
-                    controller.showLogs ? Icons.keyboard_arrow_up : Icons.terminal,
-                    size: 18,
-                  ),
-                  label: Text(controller.showLogs ? '로그 닫기' : '로그 보기'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[700],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              // 차량 정보 섹션
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: AppConstants.backgroundSecondary.withOpacity(0.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    '${controller.vehicleNumber} (${controller.vehicleId})',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ),
               ),
+              // 나머지 콘텐츠
+              Expanded(
+                child: ListView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 16,
+                    bottom: 80,
+                  ),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    // 게이지 섹션
+                    GaugeSection(
+                      speedKmh: speedKmh,
+                      batteryPercent: batteryPercent,
+                    ),
+                    const SizedBox(height: 8),
 
-              // 로그 섹션
-              if (controller.showLogs) ...[
-                const SizedBox(height: 12),
-                LogSection(
-                  showLogs: controller.showLogs,
-                  onClose: controller.toggleLogs,
+                    // 통합된 차량 상태 섹션
+                    VehicleStatusSection(
+                      turnSignal: vehicleData?.turnSignal ?? 0,
+                      blinkAnimation: _blinkController,
+                      isAutoDrive: vehicleData?.operationModeAuto ?? false,
+                      isBraking: vehicleData?.brakePedal ?? false,
+                      isBrushOn: vehicleData?.blowerRun ?? false,
+                      harshDriving: vehicleData?.harshDriving ?? 0,
+                    ),
+                    const SizedBox(height: 8),
+
+                    // 스트림 1
+                    StreamBuilder<bool>(
+                      stream: controller.stream1.connectionStream,
+                      initialData: false,
+                      builder: (context, snapshot) {
+                        return StreamCard(
+                          title: 'Stream ${controller.stream1Id}',
+                          renderer: controller.stream1.renderer,
+                          isConnected: snapshot.data ?? false,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 6),
+
+                    // 스트림 2
+                    StreamBuilder<bool>(
+                      stream: controller.stream2.connectionStream,
+                      initialData: false,
+                      builder: (context, snapshot) {
+                        return StreamCard(
+                          title: 'Stream ${controller.stream2Id}',
+                          renderer: controller.stream2.renderer,
+                          isConnected: snapshot.data ?? false,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 로그 버튼
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: controller.toggleLogs,
+                        icon: Icon(
+                          controller.showLogs ? Icons.keyboard_arrow_up : Icons.terminal,
+                          size: 18,
+                        ),
+                        label: Text(controller.showLogs ? '로그 닫기' : '로그 보기'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 로그 섹션
+                    if (controller.showLogs) ...[
+                      const SizedBox(height: 12),
+                      LogSection(
+                        showLogs: controller.showLogs,
+                        onClose: controller.toggleLogs,
+                      ),
+                    ],
+
+                    const SizedBox(height: 20),
+                  ],
                 ),
-              ],
-
-              const SizedBox(height: 20),
+              ),
             ],
           ),
         );
       },
     );
   }
+
 }
