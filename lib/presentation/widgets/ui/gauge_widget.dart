@@ -144,25 +144,15 @@ class GaugePainter extends CustomPainter {
 
     // 진행률 표시 원호 그리기
     if (percentage > 0) {
-      // 그라데이션 효과 추가
-      final gradient = SweepGradient(
-        colors: [
-          color.withOpacity(0.3),
-          color,
-        ],
-        stops: const [0.0, 1.0],
-        startAngle: startAngle,
-        endAngle: startAngle + totalAngle,
-      );
+      // 진행률에 따른 호의 각도 계산
+      final sweepAngle = totalAngle * percentage;
 
+      // 진행률 호 그리기 (그라데이션 제거, 단색으로)
       final progressPaint = Paint()
-        ..shader = gradient.createShader(Rect.fromCircle(center: center, radius: radius - 6))
+        ..color = color
         ..style = PaintingStyle.stroke
         ..strokeWidth = 6
         ..strokeCap = StrokeCap.round;
-
-      // 진행률에 따른 호의 각도 계산
-      final sweepAngle = totalAngle * percentage;
 
       // 호 그리기
       canvas.drawArc(
@@ -173,14 +163,20 @@ class GaugePainter extends CustomPainter {
         progressPaint,
       );
 
-      // 끝점에만 원형 캡 추가 (더 깔끔한 모습)
+      // 끝점에 완전히 채워진 원형 캡 추가
       final endAngle = startAngle + sweepAngle;
       final endX = center.dx + (radius - 6) * math.cos(endAngle);
       final endY = center.dy + (radius - 6) * math.sin(endAngle);
+
+      // 외곽선 없는 채워진 원
+      final capPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+
       canvas.drawCircle(
         Offset(endX, endY),
         4,
-        Paint()..color = color,
+        capPaint,
       );
     }
   }

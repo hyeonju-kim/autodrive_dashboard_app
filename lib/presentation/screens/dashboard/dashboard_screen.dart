@@ -237,21 +237,19 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                     const SizedBox(height: 16),
 
-                    // 로그 버튼
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: controller.toggleLogs,
-                        icon: Icon(
-                          controller.showLogs ? Icons.keyboard_arrow_up : Icons.terminal,
-                          size: 18,
-                        ),
-                        label: Text(controller.showLogs ? '로그 닫기' : '로그 보기'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[700],
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+
+                    // 로그 버튼 (작고 눈에 안 띄게)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        onTap: controller.toggleLogs,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: Icon(
+                            Icons.more_horiz,
+                            size: 16,
+                            color: Colors.white.withOpacity(0.05),
                           ),
                         ),
                       ),
@@ -259,7 +257,7 @@ class _DashboardScreenState extends State<DashboardScreen>
 
                     // 로그 섹션
                     if (controller.showLogs) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       LogSection(
                         showLogs: controller.showLogs,
                         onClose: controller.toggleLogs,
