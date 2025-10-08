@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../core/config/app_constants.dart';
+import 'developer_screen.dart';
 
 /// 설정 화면
 /// 앱 설정 및 환경설정을 관리하는 화면
@@ -25,24 +26,6 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _buildSettingsSection(
-            title: '서버 설정',
-            children: [
-              _buildSettingsTile(
-                icon: Icons.dns,
-                title: 'Janus 서버',
-                subtitle: AppConstants.janusServer,
-                onTap: () {},
-              ),
-              _buildSettingsTile(
-                icon: Icons.cloud,
-                title: 'MQTT 서버',
-                subtitle: 'ws://${AppConstants.mqttHost}\n화성: ${AppConstants.mqttPortMars} / 제주: ${AppConstants.mqttPortJeju}',
-                onTap: () {},
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildSettingsSection(
             title: '앱 정보',
             children: [
               _buildSettingsTile(
@@ -57,6 +40,20 @@ class SettingsScreen extends StatelessWidget {
                 subtitle: '사용 가이드',
                 onTap: () {},
               ),
+              // 또는 설정 화면에서 개발자 옵션으로 이동하는 버튼 추가
+              _buildSettingsTile(
+                icon: Icons.developer_mode,
+                title: '개발자 옵션',
+                subtitle: '테스트 및 디버깅 도구',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DeveloperScreen(),
+                    ),
+                  );
+                },
+              )
             ],
           ),
         ],

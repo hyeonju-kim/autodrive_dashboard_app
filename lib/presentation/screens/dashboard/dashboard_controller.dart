@@ -98,7 +98,13 @@ class DashboardController extends ChangeNotifier {
     try {
       // 지역별 포트 선택
       final mqttPort = isMars ? AppConstants.mqttPortMars : AppConstants.mqttPortJeju;
-      await _mqttService.connectToVehicle(vehicleId, port: mqttPort);
+
+      // 차량 번호도 함께 전달
+      await _mqttService.connectToVehicle(
+        vehicleId,
+        port: mqttPort,
+        vehicleNumber: vehicleNumber, // 추가
+      );
 
       _vehicleDataSubscription = _mqttService.vehicleDataStream.listen((data) {
         // 새로운 데이터가 들어오면 운행이 재개된 것으로 판단

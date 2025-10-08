@@ -7,7 +7,6 @@ void main() async {
 
   // 알림 서비스 초기화
   await NotificationService.init();
-  await NotificationService.startBackgroundTask();
 
   runApp(const App());
 }

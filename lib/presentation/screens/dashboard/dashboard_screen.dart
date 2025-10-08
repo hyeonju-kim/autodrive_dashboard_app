@@ -215,30 +215,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                       ),
                       const SizedBox(height: 4),
 
-                      // 알림 테스트 버튼 추가 (개발용)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            debugPrint('🔵 알림 테스트 버튼 클릭됨');
-                            try {
-                              await NotificationService.showNotification();
-                              debugPrint('✅ 알림 요청 완료');
-                            } catch (e) {
-                              debugPrint('❌ 알림 요청 실패: $e');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[700],
-                            minimumSize: const Size(double.infinity, 40),
-                          ),
-                          child: const Text(
-                            '알림 테스트',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
 
                       // 스트림 1
                       StreamBuilder<bool>(
