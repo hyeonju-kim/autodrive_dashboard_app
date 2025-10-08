@@ -22,6 +22,7 @@ class DashboardController extends ChangeNotifier {
 
   Timer? _pollTimer;
   Timer? _clockTimer;
+  // Timer? _reconnectTimer; // 제거
 
   // ===== 상태 변수 =====
   String _currentTime = '';
@@ -29,10 +30,13 @@ class DashboardController extends ChangeNotifier {
   bool _showLogs = false;
   VehicleData? _vehicleData;
   bool _isMqttConnected = false;
+  bool _isOperationEnded = false; // 운행 종료 상태 추가
+  bool _isStreamConnected = false; // 스트림 연결 상태 추가
 
   // ===== 구독 =====
   StreamSubscription<VehicleData>? _vehicleDataSubscription;
   StreamSubscription<bool>? _mqttConnectionSubscription;
+  StreamSubscription<bool>? _resetSubscription;
   VoidCallback? _logListener;
 
   // ===== Getters =====
@@ -41,6 +45,8 @@ class DashboardController extends ChangeNotifier {
   bool get showLogs => _showLogs;
   VehicleData? get vehicleData => _vehicleData;
   bool get isMqttConnected => _isMqttConnected;
+  bool get isOperationEnded => _isOperationEnded; // 운행 종료 상태 getter 추가
+  bool get isStreamConnected => _isStreamConnected; // 스트림 연결 상태 getter 추가
 
   // 지역별 정보
   String get vehicleNumber => isMars ? AppConstants.marsVehicleNumber : AppConstants.jejuVehicleNumber;
@@ -72,7 +78,7 @@ class DashboardController extends ChangeNotifier {
     _logListener = () => notifyListeners();
     Logger.addListener(_logListener!);
 
-    // 자동으로 모든 스트림 연결
+    // 자동으로 모든 스트림 연결 (초기에만)
     await connectAllStreams();
   }
 
@@ -90,24 +96,60 @@ class DashboardController extends ChangeNotifier {
 
   Future<void> _connectMqtt() async {
     try {
-      await _mqttService.connectToTopic(mqttTopic);
+      await _mqttService.connectToVehicle(vehicleId);
 
-      _vehicleDataSubscription = _mqttService.vehicleDataStream.listen(
-            (data) {
-          _vehicleData = data;
-          notifyListeners();
-        },
-      );
+      _vehicleDataSubscription = _mqttService.vehicleDataStream.listen((data) {
+        // 새로운 데이터가 들어오면 운행이 재개된 것으로 판단
+        if (_isOperationEnded) {
+          Logger.log('🚗 운행 재개 감지 - 스트림 재연결 시작');
+          _isOperationEnded = false;
+          connectAllStreams(); // 자동으로 스트림 재연결
+        }
 
-      _mqttConnectionSubscription = _mqttService.connectionStream.listen(
-            (connected) {
-          _isMqttConnected = connected;
-          notifyListeners();
-        },
-      );
+        _vehicleData = data;
+        notifyListeners();
+      });
+
+      _mqttConnectionSubscription = _mqttService.connectionStream.listen((connected) {
+        _isMqttConnected = connected;
+        notifyListeners();
+      });
+
+      // 리셋 스트림 구독
+      _resetSubscription = _mqttService.resetStream.listen((reset) {
+        if (reset) {
+          _handleReset();
+        }
+      });
     } catch (e) {
       Logger.log('❌ MQTT 연결 실패: $e');
     }
+  }
+
+  void _handleReset() {
+    Logger.log('🔄 운행 종료 - 리셋 처리 시작');
+
+    // 운행 종료 상태로 변경
+    _isOperationEnded = true;
+
+    // 차량 데이터 초기화
+    _vehicleData = null;
+
+    // 비디오 스트림 중지
+    _pollTimer?.cancel();
+    _stream1Service.disconnect();
+    _stream2Service.disconnect();
+    _isStreamConnected = false;
+
+    // UI 업데이트
+    notifyListeners();
+
+    // 10초 후 재연결 제거 (이제 MQTT 메시지가 들어올 때까지 대기)
+    // _reconnectTimer?.cancel();
+    // _reconnectTimer = Timer(const Duration(seconds: 10), () async {
+    //   Logger.log('🔄 10초 후 재연결 시작');
+    //   await connectAllStreams();
+    // });
   }
 
   Future<void> connectAllStreams() async {
@@ -117,9 +159,13 @@ class DashboardController extends ChangeNotifier {
         _stream1Service.connect(),
         _stream2Service.connect(),
       ]);
+      _isStreamConnected = true;
       _startPolling();
+      notifyListeners();
     } catch (e) {
       Logger.log('❌ 스트림 연결 실패: $e');
+      _isStreamConnected = false;
+      notifyListeners();
     }
   }
 
@@ -148,9 +194,14 @@ class DashboardController extends ChangeNotifier {
     _pollTimer?.cancel();
     _stream1Service.peerConnection?.close();
     _stream2Service.peerConnection?.close();
+    _isStreamConnected = false;
 
     await Future.delayed(const Duration(milliseconds: 500));
-    await connectAllStreams();
+
+    // 운행 종료 상태가 아닐 때만 재연결
+    if (!_isOperationEnded) {
+      await connectAllStreams();
+    }
 
     _isRefreshing = false;
     notifyListeners();
@@ -169,6 +220,7 @@ class DashboardController extends ChangeNotifier {
     _pollTimer?.cancel();
     _vehicleDataSubscription?.cancel();
     _mqttConnectionSubscription?.cancel();
+    _resetSubscription?.cancel();
 
     if (_logListener != null) {
       Logger.removeListener(_logListener!);

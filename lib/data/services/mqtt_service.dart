@@ -1,3 +1,5 @@
+// lib/data/services/mqtt_service.dart
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -20,16 +22,25 @@ class MqttService {
 
   /// MQTT 연결 상태 스트림 컨트롤러
   final _connectionController = StreamController<bool>.broadcast();
+  final _resetController = StreamController<bool>.broadcast();
 
-  String? _currentTopic; // 현재 구독 중인 토픽
+  String? _currentVehicleId;
+  String? _currentDataTopic;
+  String? _currentResetTopic;
+
+  Timer? _dataTimeoutTimer;
+  bool _wasDisconnected = false;
 
   Stream<VehicleData> get vehicleDataStream => _vehicleDataController.stream;
 
   /// MQTT 연결 상태를 방출하는 스트림
   Stream<bool> get connectionStream => _connectionController.stream;
+  Stream<bool> get resetStream => _resetController.stream;
 
-  Future<void> connectToTopic(String topic) async {
-    _currentTopic = topic;
+  Future<void> connectToVehicle(String vehicleId) async {
+    _currentVehicleId = vehicleId;
+    _currentDataTopic = AppConstants.mqttDataTopicTemplate.replaceAll('%s', vehicleId);
+    _currentResetTopic = AppConstants.mqttResetTopicTemplate.replaceAll('%s', vehicleId);
     await connect();
   }
 
@@ -86,29 +97,66 @@ class MqttService {
     Logger.log('✅ MQTT 연결 성공');
     _connectionController.add(true);
 
-    if (_currentTopic != null) {
-      _client!.subscribe(_currentTopic!, MqttQos.atLeastOnce);
-      Logger.log('✅ 토픽 구독 완료: $_currentTopic');
+    if (_currentDataTopic != null && _currentResetTopic != null) {
+      // 데이터 토픽 구독
+      _client!.subscribe(_currentDataTopic!, MqttQos.atLeastOnce);
+      Logger.log('✅ 데이터 토픽 구독: $_currentDataTopic');
+
+      // 리셋 토픽 구독
+      _client!.subscribe(_currentResetTopic!, MqttQos.atLeastOnce);
+      Logger.log('✅ 리셋 토픽 구독: $_currentResetTopic');
     }
 
-    // 메시지 수신 리스너 설정
-    _client!.updates!.listen((messages) {
-      final message = messages[0];
-      final recMess = message.payload as MqttPublishMessage;
+    // 메시지 리스너
+    _client!.updates!.listen(_onMessage);
+  }
 
-      // 바이트 배열을 문자열로 변환
-      final payload = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+  void _onMessage(List<MqttReceivedMessage<MqttMessage>> messages) {
+    for (final message in messages) {
+      final pubMsg = message.payload as MqttPublishMessage;
+      final jsonString = MqttPublishPayload.bytesToStringAsString(pubMsg.payload.message);
 
       try {
-        // JSON 파싱 및 VehicleData 객체 생성
-        final data = jsonDecode(payload);
-        final vehicleData = VehicleData.fromJson(data);
+        final jsonData = json.decode(jsonString);
 
-        // 스트림으로 데이터 방출
-        _vehicleDataController.add(vehicleData);
+        // 리셋 메시지 처리
+        if (message.topic == _currentResetTopic) {
+          if (jsonData['isReset'] == true) {
+            Logger.log('🔄 리셋 신호 수신');
+            _resetController.add(true);
+            _dataTimeoutTimer?.cancel();
+          }
+        }
+        // 데이터 메시지 처리
+        else if (message.topic == _currentDataTopic) {
+          Logger.log('📥 차량 데이터 수신');
+
+          // 5분 이상 끊어졌다가 다시 연결된 경우
+          if (_wasDisconnected) {
+            _wasDisconnected = false;
+            // NotificationService.showNotification(
+            //   title: '차량 연결 복구',
+            //   body: '${jsonData['vehicleNum']} 차량이 다시 연결되었습니다.',
+            // );
+          }
+
+          // 타이머 리셋
+          _resetDataTimer();
+
+          final vehicleData = VehicleData.fromJson(jsonData);
+          _vehicleDataController.add(vehicleData);
+        }
       } catch (e) {
-        Logger.log('❌ MQTT 메시지 파싱 오류: $e');
+        Logger.log('❌ JSON 파싱 오류: $e');
       }
+    }
+  }
+
+  void _resetDataTimer() {
+    _dataTimeoutTimer?.cancel();
+    _dataTimeoutTimer = Timer(const Duration(minutes: 5), () {
+      Logger.log('⚠️ 5분간 데이터 수신 없음');
+      _wasDisconnected = true;
     });
   }
 
@@ -121,8 +169,10 @@ class MqttService {
   /// 리소스 정리
   /// 앱 종료 시 반드시 호출하여 메모리 누수 방지
   void dispose() {
+    _dataTimeoutTimer?.cancel();
     _client?.disconnect();
     _vehicleDataController.close();
     _connectionController.close();
+    _resetController.close();
   }
 }

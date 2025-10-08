@@ -300,6 +300,20 @@ class JanusService {
     return 'tx_${DateTime.now().millisecondsSinceEpoch}_$streamId';
   }
 
+  /// 연결 끊기
+  void disconnect() {
+    Logger.log('🔌 Stream $streamId 연결 종료');
+
+    isConnected = false;
+    _connectionController.add(false);
+
+    peerConnection?.close();
+    peerConnection = null;
+
+    sessionId = null;
+    handleId = null;
+  }
+
   /// 리소스 정리
   /// 렌더러, 피어 연결, 스트림 컨트롤러 해제
   void dispose() {

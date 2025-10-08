@@ -4,7 +4,6 @@ import '../../../core/config/app_constants.dart';
 import '../../widgets/dashboard/gauge_section.dart';
 import '../../widgets/dashboard/log_section.dart';
 import '../../widgets/common/stream_card.dart';
-import '../../widgets/common/alert_banner.dart';
 import '../../widgets/dashboard/vehicle_status_section.dart';
 import 'dashboard_controller.dart';
 
@@ -83,23 +82,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         body: Stack(
           children: [
             _buildBody(),
-            // 알림 배너 추가
-            Consumer<DashboardController>(
-              builder: (context, controller, child) {
-                if (controller.currentAlert != null) {
-                  return Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: AlertBanner(
-                      alert: controller.currentAlert!,
-                      onDismiss: controller.dismissAlert,
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
           ],
         ),
       ),
@@ -240,6 +222,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           title: 'Stream ${controller.stream1Id}',
                           renderer: controller.stream1.renderer,
                           isConnected: snapshot.data ?? false,
+                          isOperationEnded: controller.isOperationEnded, // 운행 종료 상태 전달
+
                         );
                       },
                     ),
@@ -254,6 +238,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           title: 'Stream ${controller.stream2Id}',
                           renderer: controller.stream2.renderer,
                           isConnected: snapshot.data ?? false,
+                          isOperationEnded: controller.isOperationEnded, // 운행 종료 상태 전달
+
                         );
                       },
                     ),

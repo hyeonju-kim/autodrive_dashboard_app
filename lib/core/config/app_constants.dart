@@ -19,11 +19,18 @@ class AppConstants {
   static const int mqttPort = 8083;
   static const String mqttUsername = 'socket';
   static const String mqttPassword = 'thzpt!@#';
-  static const String mqttTopic = '/topic/f4FwwkGR';
-  /// 차량 데이터를 수신할 MQTT 토픽 (화성)
+
+  // MQTT 토픽 템플릿
+  static const String mqttDataTopicTemplate = '/topic/%s';
+  static const String mqttResetTopicTemplate = '/topic/%s/route/reset';
+
+  // 화성 토픽들
   static const String mqttTopicMars = '/topic/f4FwwkGR';
-  /// 차량 데이터를 수신할 MQTT 토픽 (제주)
+  static const String mqttResetTopicMars = '/topic/f4FwwkGR/route/reset';
+
+  // 제주 토픽들
   static const String mqttTopicJeju = '/topic/VEHICLEID';
+  static const String mqttResetTopicJeju = '/topic/VEHICLEID/route/reset';
 
   // ICE 서버 설정
   static const List<String> stunServers = [

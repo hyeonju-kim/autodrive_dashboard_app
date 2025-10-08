@@ -15,6 +15,9 @@ class StreamCard extends StatelessWidget {
   /// 연결 상태
   final bool isConnected;
 
+  /// 운행 종료 상태 (추가)
+  final bool isOperationEnded;
+
   /// 재연결 콜백 (제거해도 되지만 타입 호환성을 위해 유지)
   final VoidCallback? onReconnect;
 
@@ -23,6 +26,7 @@ class StreamCard extends StatelessWidget {
     required this.title,
     required this.renderer,
     required this.isConnected,
+    this.isOperationEnded = false, // 기본값 false
     this.onReconnect,
   });
 
@@ -38,22 +42,29 @@ class StreamCard extends StatelessWidget {
           color: Colors.black,
           child: Stack(
             children: [
-              // 비디오 스트림 또는 로딩 표시
-              if (isConnected)
+              // 비디오 스트림 또는 상태 표시
+              if (isConnected && !isOperationEnded)
                 RTCVideoView(
                   renderer,
                   objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
                 )
               else
-                const Center(
+                Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(color: Colors.blue),
-                      SizedBox(height: 12),
+                      // 운행 종료일 때는 아이콘 없이, 연결 중일 때만 로딩 표시
+                      if (!isOperationEnded)
+                        const CircularProgressIndicator(color: Colors.blue),
+                      if (!isOperationEnded)
+                        const SizedBox(height: 12),
                       Text(
-                        '연결 중...',
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                        isOperationEnded ? '운행 종료' : '연결 중...',
+                        style: TextStyle(
+                          color: isOperationEnded ? Colors.grey : Colors.white70,
+                          fontSize: isOperationEnded ? 14 : 14,
+                          fontWeight: isOperationEnded ? FontWeight.w500 : FontWeight.normal,
+                        ),
                       ),
                     ],
                   ),
@@ -77,7 +88,7 @@ class StreamCard extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: isConnected ? Colors.green : Colors.red,
+                          color: _getStatusColor(),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -96,8 +107,8 @@ class StreamCard extends StatelessWidget {
                 ),
               ),
 
-              // 하단 우측: 전체화면 버튼
-              if (isConnected)
+              // 하단 우측: 전체화면 버튼 (운행 종료가 아니고 연결되어 있을 때만)
+              if (isConnected && !isOperationEnded)
                 Positioned(
                   bottom: 12,
                   right: 12,
@@ -125,6 +136,13 @@ class StreamCard extends StatelessWidget {
     );
   }
 
+  Color _getStatusColor() {
+    if (isOperationEnded) {
+      return Colors.grey;
+    }
+    return isConnected ? Colors.green : Colors.red;
+  }
+
   /// 전체화면 표시
   void _showFullScreen(BuildContext context) {
     Navigator.of(context).push(
@@ -139,7 +157,7 @@ class StreamCard extends StatelessWidget {
   }
 }
 
-/// 전체화면 비디오 뷰어
+// FullScreenVideo 클래스는 동일하게 유지
 class FullScreenVideo extends StatefulWidget {
   final RTCVideoRenderer renderer;
   final String title;
