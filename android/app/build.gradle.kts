@@ -11,6 +11,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17  // 17로 변경
         targetCompatibility = JavaVersion.VERSION_17  // 17로 변경
+        // alert 기능 추가로 필요해서 추가
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -34,4 +36,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+// alert 기능 추가로 필요해서 추가
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
