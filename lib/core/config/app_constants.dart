@@ -8,15 +8,18 @@ class AppConstants {
 
   /// 제주 차량 정보
   static const String jejuVehicleNumber = '00임4427';
-  static const String jejuVehicleId = 'VEHICLEID';
+  // static const String jejuVehicleId = 'VEHICLEID';
+  static const String jejuVehicleId = 'f4FwwkGR';
 
   // Janus 서버 설정
   static const String janusServer = 'http://123.143.232.180:25800/janus';
 
   // MQTT 설정
-  static const String mqttHost = '192.168.2.51';
+  // static const String mqttHost = '192.168.2.51';
+  static const String mqttHost = '123.143.232.180';
   static const String mqttPath = '/mqtt';
-  static const int mqttPort = 8083;
+  static const int mqttPortMars = 38083; // 화성
+  static const int mqttPortJeju = 28083; // 제주
   static const String mqttUsername = 'socket';
   static const String mqttPassword = 'thzpt!@#';
 
@@ -29,8 +32,8 @@ class AppConstants {
   static const String mqttResetTopicMars = '/topic/f4FwwkGR/route/reset';
 
   // 제주 토픽들
-  static const String mqttTopicJeju = '/topic/VEHICLEID';
-  static const String mqttResetTopicJeju = '/topic/VEHICLEID/route/reset';
+  static const String mqttTopicJeju = '/topic/f4FwwkGR';
+  static const String mqttResetTopicJeju = '/topic/f4FwwkGR/route/reset';
 
   // ICE 서버 설정
   static const List<String> stunServers = [

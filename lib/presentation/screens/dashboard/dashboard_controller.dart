@@ -96,7 +96,9 @@ class DashboardController extends ChangeNotifier {
 
   Future<void> _connectMqtt() async {
     try {
-      await _mqttService.connectToVehicle(vehicleId);
+      // 지역별 포트 선택
+      final mqttPort = isMars ? AppConstants.mqttPortMars : AppConstants.mqttPortJeju;
+      await _mqttService.connectToVehicle(vehicleId, port: mqttPort);
 
       _vehicleDataSubscription = _mqttService.vehicleDataStream.listen((data) {
         // 새로운 데이터가 들어오면 운행이 재개된 것으로 판단

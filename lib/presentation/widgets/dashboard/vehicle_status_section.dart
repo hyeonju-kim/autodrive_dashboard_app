@@ -96,14 +96,14 @@ class VehicleStatusSection extends StatelessWidget {
                 icon: Icons.local_parking,
                 label: '브레이크',
                 isOn: isBraking,
-                onColor: Colors.grey[600]!,
+                onColor: Colors.green[600]!,
               ),
               // 브러시 상태
               StatusButton(
                 icon: Icons.cleaning_services,
                 label: '브러쉬',
                 isOn: isBrushOn,
-                onColor: Colors.grey[600]!,
+                onColor: Colors.pink[600]!,
               ),
               // 급가속/급정거 상태
               HarshDrivingButton(

@@ -101,9 +101,9 @@ class GaugePainter extends CustomPainter {
     final radius = size.width / 2;
 
     // 게이지가 차지할 전체 각도 (거의 전체 원, 작은 갭 남김)
-    const double totalAngle = math.pi * 2 * 0.85; // 전체 원의 85% (306도)
+    const double totalAngle = math.pi * 2 * 0.98; // 전체 원의 98%
     // 시작 각도 (하단 약간 오른쪽)
-    const double startAngle = math.pi * 0.575; // 약 103.5도
+    const double startAngle = math.pi * 0.525;
 
     // 배경 원 그리기 (회색 테두리)
     final backgroundPaint = Paint()

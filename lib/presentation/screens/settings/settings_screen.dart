@@ -36,7 +36,7 @@ class SettingsScreen extends StatelessWidget {
               _buildSettingsTile(
                 icon: Icons.cloud,
                 title: 'MQTT 서버',
-                subtitle: 'ws://${AppConstants.mqttHost}:${AppConstants.mqttPort}',
+                subtitle: 'ws://${AppConstants.mqttHost}\n화성: ${AppConstants.mqttPortMars} / 제주: ${AppConstants.mqttPortJeju}',
                 onTap: () {},
               ),
             ],

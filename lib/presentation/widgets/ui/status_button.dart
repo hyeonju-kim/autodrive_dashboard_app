@@ -69,33 +69,61 @@ class HarshDrivingButton extends StatelessWidget {
 
     // 상태에 따른 색상과 텍스트 설정
     Color alertColor;
-    IconData alertIcon;
+    String statusText;
 
     if (isAccel) {
       alertColor = Colors.orange;
-      alertIcon = Icons.speed;
+      statusText = '급가속';
     } else if (isDecel) {
       alertColor = Colors.red;
-      alertIcon = Icons.do_not_disturb_on;
+      statusText = '급정거';
     } else {
       alertColor = Colors.grey[600]!;
-      alertIcon = Icons.check_circle_outline;
+      statusText = '';
     }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          alertIcon,
-          color: alertColor,
-          size: 28,
+        // 아이콘 대신 상태 텍스트를 배지 스타일로 표시
+        Container(
+          height: 28,
+          child: Center(
+            child: statusText.isNotEmpty
+                ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: alertColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: alertColor.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Text(
+                statusText,
+                style: TextStyle(
+                  color: alertColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            )
+                : Icon(
+              Icons.speed,
+              color: Colors.grey[600],
+              size: 28,
+            ),
+          ),
         ),
         const SizedBox(height: 4),
+        // 라벨은 항상 "급가속/급정거"로 고정
         Text(
-          isAccel ? '급가속' : (isDecel ? '급정거' : '급가속/급정거'),
+          '급가속/급정거',
           style: TextStyle(
             fontSize: 12,
-            color: alertColor == Colors.grey[600] ? Colors.white38 : alertColor,
+            color: (isAccel || isDecel) ? Colors.white70 : Colors.white38,
           ),
         ),
       ],

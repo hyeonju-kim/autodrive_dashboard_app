@@ -37,14 +37,14 @@ class MqttService {
   Stream<bool> get connectionStream => _connectionController.stream;
   Stream<bool> get resetStream => _resetController.stream;
 
-  Future<void> connectToVehicle(String vehicleId) async {
+  Future<void> connectToVehicle(String vehicleId, {required int port}) async {
     _currentVehicleId = vehicleId;
     _currentDataTopic = AppConstants.mqttDataTopicTemplate.replaceAll('%s', vehicleId);
     _currentResetTopic = AppConstants.mqttResetTopicTemplate.replaceAll('%s', vehicleId);
-    await connect();
+    await connect(port: port);
   }
 
-  Future<void> connect() async {
+  Future<void> connect({required int port}) async {
     try {
       // 고유한 클라이언트 ID 생성 (타임스탬프 사용)
       final clientId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
@@ -54,7 +54,7 @@ class MqttService {
       _client = MqttServerClient.withPort(
         'ws://${AppConstants.mqttHost}${AppConstants.mqttPath}',
         clientId,
-        AppConstants.mqttPort,
+        port, // AppConstants.mqttPort 대신 매개변수 사용
       );
 
       final serverClient = _client as MqttServerClient;
