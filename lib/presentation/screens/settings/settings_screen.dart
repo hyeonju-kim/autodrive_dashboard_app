@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../core/config/app_constants.dart';
+import 'help_screen.dart';
 import 'developer_screen.dart';
 
 /// 설정 화면
@@ -37,10 +38,16 @@ class SettingsScreen extends StatelessWidget {
               _buildSettingsTile(
                 icon: Icons.help_outline,
                 title: '도움말',
-                subtitle: '사용 가이드',
-                onTap: () {},
+                subtitle: '사용 가이드 및 알림 설정',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HelpScreen(),
+                    ),
+                  );
+                },
               ),
-              // 또는 설정 화면에서 개발자 옵션으로 이동하는 버튼 추가
               _buildSettingsTile(
                 icon: Icons.developer_mode,
                 title: '개발자 옵션',
