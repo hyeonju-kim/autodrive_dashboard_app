@@ -14,15 +14,28 @@ class Logger {
 
   /// 새로운 로그 메시지를 추가
   /// [message]: 로그로 기록할 메시지
-  static void log(String message) {
+  /// [fileName]: 로그가 발생한 파일명 (선택적)
+  static void log(String message, {String? fileName}) {
     // 현재 시간을 HH:mm:ss 형식으로 포맷
     final now = DateTime.now();
     final timeStr = '${now.hour.toString().padLeft(2, '0')}:'
         '${now.minute.toString().padLeft(2, '0')}:'
         '${now.second.toString().padLeft(2, '0')}';
 
-    // 시간 태그를 포함한 로그 메시지 생성
-    final logMessage = '[$timeStr] $message';
+    // 파일명이 없으면 스택 트레이스에서 추출
+    if (fileName == null) {
+      final trace = StackTrace.current.toString().split('\n');
+      if (trace.length > 1) {
+        // 호출한 파일 정보 추출 (두 번째 줄에 있음)
+        final match = RegExp(r'([a-zA-Z_]+\.dart)').firstMatch(trace[1]);
+        if (match != null) {
+          fileName = match.group(1)?.replaceAll('.dart', '') ?? 'unknown';
+        }
+      }
+    }
+
+    // 시간과 파일명을 포함한 로그 메시지 생성
+    final logMessage = '[$timeStr] ${fileName != null ? '[$fileName] ' : ''}$message';
 
     // 콘솔에 출력 (디버깅용)
     print(logMessage);

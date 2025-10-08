@@ -38,7 +38,7 @@ class StreamCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          height: 220,
+          height: 215,
           color: Colors.black,
           child: Stack(
             children: [
@@ -113,7 +113,7 @@ class StreamCard extends StatelessWidget {
                   bottom: 12,
                   right: 12,
                   child: Material(
-                    color: Colors.black54,
+                    color: Colors.black12,
                     borderRadius: BorderRadius.circular(20),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
@@ -123,7 +123,7 @@ class StreamCard extends StatelessWidget {
                         child: const Icon(
                           Icons.fullscreen,
                           color: Colors.white,
-                          size: 24,
+                          size: 18,
                         ),
                       ),
                     ),

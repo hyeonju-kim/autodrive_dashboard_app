@@ -53,12 +53,10 @@ class AppConstants {
   static const int stream2Id = 12;
 
   /// 제주 - 첫 번째 카메라 스트림 ID
-  // static const int jejuStream1Id = 13;
-  static const int jejuStream1Id = 11;
+  static const int jejuStream1Id = 13;
 
   /// 제주 - 두 번째 카메라 스트림 ID
-  // static const int jejuStream2Id = 14;
-  static const int jejuStream2Id = 12;
+  static const int jejuStream2Id = 14;
 
   // 타이머 설정
   static const Duration pollInterval = Duration(milliseconds: 500);

@@ -103,7 +103,7 @@ class DashboardController extends ChangeNotifier {
       _vehicleDataSubscription = _mqttService.vehicleDataStream.listen((data) {
         // 새로운 데이터가 들어오면 운행이 재개된 것으로 판단
         if (_isOperationEnded) {
-          Logger.log('🚗 운행 재개 감지 - 스트림 재연결 시작');
+          Logger.log('🚗 ${isMars ? "화성" : "제주"} 운행 재개 감지 - 스트림 재연결 시작');
           _isOperationEnded = false;
           connectAllStreams(); // 자동으로 스트림 재연결
         }
@@ -124,12 +124,12 @@ class DashboardController extends ChangeNotifier {
         }
       });
     } catch (e) {
-      Logger.log('❌ MQTT 연결 실패: $e');
+      Logger.log('❌ ${isMars ? "화성" : "제주"} MQTT 연결 실패: $e');
     }
   }
 
   void _handleReset() {
-    Logger.log('🔄 운행 종료 - 리셋 처리 시작');
+    Logger.log('🔄 ${isMars ? "화성" : "제주"} 운행 종료 - 리셋 처리 시작');
 
     // 운행 종료 상태로 변경
     _isOperationEnded = true;
@@ -165,7 +165,7 @@ class DashboardController extends ChangeNotifier {
       _startPolling();
       notifyListeners();
     } catch (e) {
-      Logger.log('❌ 스트림 연결 실패: $e');
+      Logger.log('❌ ${isMars ? "화성" : "제주"} 스트림 연결 실패: $e');
       _isStreamConnected = false;
       notifyListeners();
     }
@@ -191,7 +191,7 @@ class DashboardController extends ChangeNotifier {
     _isRefreshing = true;
     notifyListeners();
 
-    Logger.log('🔄 새로고침 시작');
+    Logger.log('🔄 ${isMars ? "화성" : "제주"} 새로고침 시작');
 
     _pollTimer?.cancel();
     _stream1Service.peerConnection?.close();

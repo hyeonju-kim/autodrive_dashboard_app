@@ -185,95 +185,97 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               // 나머지 콘텐츠
               Expanded(
-                child: ListView(
+                child: SingleChildScrollView(
                   controller: _scrollController,
                   padding: const EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    top: 16,
-                    bottom: 80,
+                    left: 8,
+                    right: 8,
+                    top: 6,
+                    bottom: 0,
                   ),
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    // 게이지 섹션
-                    GaugeSection(
-                      speedKmh: speedKmh,
-                      batteryPercent: batteryPercent,
-                    ),
-                    const SizedBox(height: 8),
+                  child: Column(
+                    children: [
+                      // 게이지 섹션
+                      GaugeSection(
+                        speedKmh: speedKmh,
+                        batteryPercent: batteryPercent,
+                      ),
+                      const SizedBox(height: 6),
 
-                    // 통합된 차량 상태 섹션
-                    VehicleStatusSection(
-                      turnSignal: vehicleData?.turnSignal ?? 0,
-                      blinkAnimation: _blinkController,
-                      isAutoDrive: vehicleData?.operationModeAuto ?? false,
-                      isBraking: vehicleData?.brakePedal ?? false,
-                      isBrushOn: vehicleData?.blowerRun ?? false,
-                      harshDriving: vehicleData?.harshDriving ?? 0,
-                    ),
-                    const SizedBox(height: 8),
+                      // 통합된 차량 상태 섹션
+                      VehicleStatusSection(
+                        turnSignal: vehicleData?.turnSignal ?? 0,
+                        blinkAnimation: _blinkController,
+                        isAutoDrive: vehicleData?.operationModeAuto ?? false,
+                        isBraking: vehicleData?.brakePedal ?? false,
+                        isBrushOn: vehicleData?.blowerRun ?? false,
+                        harshDriving: vehicleData?.harshDriving ?? 0,
+                      ),
+                      const SizedBox(height: 4),
 
-                    // 스트림 1
-                    StreamBuilder<bool>(
-                      stream: controller.stream1.connectionStream,
-                      initialData: false,
-                      builder: (context, snapshot) {
-                        return StreamCard(
-                          title: 'Stream ${controller.stream1Id}',
-                          renderer: controller.stream1.renderer,
-                          isConnected: snapshot.data ?? false,
-                          isOperationEnded: controller.isOperationEnded, // 운행 종료 상태 전달
+                      // 스트림 1
+                      StreamBuilder<bool>(
+                        stream: controller.stream1.connectionStream,
+                        initialData: false,
+                        builder: (context, snapshot) {
+                          return StreamCard(
+                            title: 'Stream ${controller.stream1Id}',
+                            renderer: controller.stream1.renderer,
+                            isConnected: snapshot.data ?? false,
+                            isOperationEnded:
+                                controller.isOperationEnded, // 운행 종료 상태 전달
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 2),
 
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 6),
+                      // 스트림 2
+                      StreamBuilder<bool>(
+                        stream: controller.stream2.connectionStream,
+                        initialData: false,
+                        builder: (context, snapshot) {
+                          return StreamCard(
+                            title: 'Stream ${controller.stream2Id}',
+                            renderer: controller.stream2.renderer,
+                            isConnected: snapshot.data ?? false,
+                            isOperationEnded:
+                                controller.isOperationEnded, // 운행 종료 상태 전달
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 1),
 
-                    // 스트림 2
-                    StreamBuilder<bool>(
-                      stream: controller.stream2.connectionStream,
-                      initialData: false,
-                      builder: (context, snapshot) {
-                        return StreamCard(
-                          title: 'Stream ${controller.stream2Id}',
-                          renderer: controller.stream2.renderer,
-                          isConnected: snapshot.data ?? false,
-                          isOperationEnded: controller.isOperationEnded, // 운행 종료 상태 전달
-
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-
-                    // 로그 버튼 (작고 눈에 안 띄게)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: InkWell(
-                        onTap: controller.toggleLogs,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          child: Icon(
-                            Icons.more_horiz,
-                            size: 16,
-                            color: Colors.white.withOpacity(0.05),
+                      // 로그 버튼 (작고 눈에 안 띄게)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: InkWell(
+                          onTap: controller.toggleLogs,
+                          borderRadius: BorderRadius.circular(4),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            child: Icon(
+                              Icons.more_horiz,
+                              size: 16,
+                              color: Colors.white.withOpacity(0.05),
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // 로그 섹션
-                    if (controller.showLogs) ...[
-                      const SizedBox(height: 8),
-                      LogSection(
-                        showLogs: controller.showLogs,
-                        onClose: controller.toggleLogs,
-                      ),
+                      // 로그 섹션
+                      if (controller.showLogs) ...[
+                        const SizedBox(height: 8),
+                        LogSection(
+                          showLogs: controller.showLogs,
+                          onClose: controller.toggleLogs,
+                        ),
+                      ],
+
+                      const SizedBox(height: 20),
                     ],
-
-                    const SizedBox(height: 20),
-                  ],
+                  ),
                 ),
               ),
             ],

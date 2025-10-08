@@ -129,7 +129,7 @@ class MqttService {
         }
         // 데이터 메시지 처리
         else if (message.topic == _currentDataTopic) {
-          Logger.log('📥 차량 데이터 수신');
+          // Logger.log('📥 차량 데이터 수신');
 
           // 5분 이상 끊어졌다가 다시 연결된 경우
           if (_wasDisconnected) {
