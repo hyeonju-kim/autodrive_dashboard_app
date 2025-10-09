@@ -91,7 +91,8 @@ class NotificationService {
 
       const details = NotificationDetails(android: androidDetails);
 
-      final id = now.millisecondsSinceEpoch ~/ 1000;
+      // ID를 32비트 범위로 제한
+      final id = DateTime.now().millisecondsSinceEpoch % 2147483647;
 
       await _notifications.show(
         id,

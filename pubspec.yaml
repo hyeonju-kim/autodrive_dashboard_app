@@ -30,6 +30,9 @@ dependencies:
         ref: main
         path: workmanager
   permission_handler: ^11.1.0
+  flutter_background_service: ^5.0.5  # 지속적인 서비스용
+  shared_preferences: ^2.2.2
+
 
 dev_dependencies:
   flutter_test:

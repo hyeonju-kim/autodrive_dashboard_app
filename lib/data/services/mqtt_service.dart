@@ -8,6 +8,8 @@ import '../../core/config/app_constants.dart';
 import '../../core/utils/logger.dart';
 import '../models/vehicle_data.dart';
 import 'notification_service.dart';
+import '../../data/services/background_service.dart';  // 추가
+
 
 /// MQTT 통신을 관리하는 서비스 클래스
 /// 차량의 실시간 데이터를 MQTT 브로커로부터 수신
@@ -15,17 +17,17 @@ class MqttService {
   // ===== 설정 가능한 상수들 =====
   /// 데이터 타임아웃 시간 (분)
   /// 이 시간 동안 데이터가 수신되지 않으면 연결 끊김으로 판단
-  static const int _dataTimeoutMinutes = 3; // 원하는 시간으로 변경
+  static const int _dataTimeoutMinutes = AppConstants.dataTimeoutMinutes;
 
   /// 재연결 알림 활성화 여부
   static const bool _enableReconnectionNotification = true; // 알림 끄고 싶으면 false로 수정
 
   /// 로그 메시지 템플릿
   static const String _logResetReceived = '🔄 리셋 신호 수신';
-  static const String _logDataRecovery = '✅ 리셋 후 데이터 수신 - 정상 복귀';
+  static const String _logDataRecovery = '✅ 리셋 후 데이터 수신 - 정상 복귀 🌱🌱🌱🌱🌱🌱🌱';
   static const String _logDataReconnection = '✅ $_dataTimeoutMinutes분 이상 끊어진 후 데이터 재수신';
-  static const String _logDataTimeout = '⚠️ $_dataTimeoutMinutes분간 데이터 수신 없음 (상태 기록만)';
-  static const String _logResetTimeout = '⚠️ 리셋 후 $_dataTimeoutMinutes분간 데이터 수신 없음 (상태 기록만)';
+  static const String _logDataTimeout = '$_dataTimeoutMinutes분간 데이터 수신 없음 ❌ (상태 기록만)';
+  static const String _logResetTimeout = '리셋 후 $_dataTimeoutMinutes분간 데이터 수신 없음 ❌ (상태 기록만)';
 
   /// 알림 메시지 템플릿
   /// {location} - 지역명 (화성/제주)
@@ -35,6 +37,7 @@ class MqttService {
 
   // ===== 멤버 변수 =====
   MqttClient? _client;
+  int? _currentPort;
 
   final _vehicleDataController = StreamController<VehicleData>.broadcast();
   final _connectionController = StreamController<bool>.broadcast();
@@ -48,6 +51,7 @@ class MqttService {
   Timer? _dataTimeoutTimer;
   bool _wasDisconnected = false;
   bool _isResetState = false;
+  DateTime? _resetTime;  // 리셋 시간 추가
 
   Stream<VehicleData> get vehicleDataStream => _vehicleDataController.stream;
 
@@ -68,6 +72,8 @@ class MqttService {
   }
 
   Future<void> connect({required int port}) async {
+    _currentPort = port; // 포트 저장
+
     try {
       // 고유한 클라이언트 ID 생성 (타임스탬프 사용)
       final clientId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
@@ -140,28 +146,53 @@ class MqttService {
       try {
         final jsonData = json.decode(jsonString);
 
-        // 리셋 메시지 처리
+        /// ================= 리셋 메시지 처리 =================
         if (message.topic == _currentResetTopic) {
           if (jsonData['isReset'] == true) {
             Logger.log(_logResetReceived);
             _isResetState = true;
+            _resetTime = DateTime.now();  // 리셋 시간 기록
             _resetController.add(true);
             _dataTimeoutTimer?.cancel();
+
+            // 백그라운드 서비스에 리셋 상태 전달
+            BackgroundService.updateLastDataTime(
+              vehicleId: _currentVehicleId!,
+              vehicleNumber: _currentVehicleNumber,
+              port: _currentPort,
+              isReset: true,  // 리셋 상태 true로 설정
+              resetTime: _resetTime,  // 리셋 시간 전달
+            );
 
             // 리셋 후 타이머 시작
             _startResetTimeoutTimer();
           }
         }
-        // 데이터 메시지 처리
+        ///  ================= 데이터 메시지 처리 (리셋이 아닌 일반 메시지) =================
         else if (message.topic == _currentDataTopic) {
-          // 리셋 상태에서 데이터가 들어오면 리셋 해제
-          if (_isResetState) {
-            Logger.log(_logDataRecovery);
+          // Logger.log('📥 데이터 메시지 수신 - topic: ${message.topic}');
+
+          // 리셋 상태에서 데이터가 들어온 경우
+          if (_isResetState && _resetTime != null) {
+            final timeDiff = DateTime.now().difference(_resetTime!);
+            Logger.log('📊 리셋 후 데이터 수신 - 경과시간: ${timeDiff.inMinutes}분 ${timeDiff.inSeconds % 60}초');
+
+            // 10분 이상 경과했으면 알림 발송
+            if (timeDiff.inMinutes >= _dataTimeoutMinutes) {
+              Logger.log(_logDataReconnection);
+              if (_enableReconnectionNotification) {
+                _sendReconnectionNotification();
+              }
+            } else {
+              Logger.log('📊 리셋 후 ${timeDiff.inMinutes}분 ${timeDiff.inSeconds % 60}초 만에 데이터 수신 - 알림 발송하지 않음 ❌');
+            }
+
             _isResetState = false;
+            _resetTime = null;
           }
 
-          // 타임아웃 후 재연결된 경우
-          if (_wasDisconnected) {
+          // 일반 타임아웃 후 재연결된 경우
+          else if (_wasDisconnected) {
             Logger.log(_logDataReconnection);
             _wasDisconnected = false;
 
@@ -174,6 +205,13 @@ class MqttService {
           // 타이머 리셋
           _resetDataTimer();
 
+          // 백그라운드 서비스에 데이터 수신 시간 업데이트
+          BackgroundService.updateLastDataTime(
+            vehicleId: _currentVehicleId!,
+            vehicleNumber: _currentVehicleNumber,
+            port: _currentPort,
+            isReset: false,  // 데이터 수신시 리셋 상태 해제
+          );
           final vehicleData = VehicleData.fromJson(jsonData);
           _vehicleDataController.add(vehicleData);
         }
@@ -220,6 +258,7 @@ class MqttService {
       title: title,
       body: body,
     );
+    Logger.log(_logDataRecovery);
   }
 
   /// 지역명 가져오기 (vehicleId 기반)
