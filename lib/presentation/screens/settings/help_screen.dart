@@ -80,48 +80,26 @@ class HelpScreen extends StatelessWidget {
               children: [
                 _buildGuideItem(
                   icon: Icons.dashboard,
-                  title: '대시보드',
-                  description: '차량의 실시간 상태 및 영상 스트림을 확인할 수 있습니다.',
+                  title: '대시보드 화면',
+                  description: 'MQTT 실시간 데이터인 차량 데이터 및 실시간 영상 스트림을 확인할 수 있습니다. \n영상은 wireguard VPN 설정을 킨 상태여야 합니다.',
                 ),
                 const Divider(color: Colors.white12, height: 24),
                 _buildGuideItem(
-                  icon: Icons.speed,
-                  title: '게이지',
-                  description: '속도와 배터리 잔량을 게이지로 표시합니다.',
+                  icon: Icons.notifications,
+                  title: '알람 서비스',
+                  description: '차량 메시지가 종료된 후 10분이 지난 후에 다시 차량 메시지가 수신될 경우 알람을 발송합니다. \n앱을 모두 종료하면 알림을 받을 수 없으니 스와이프로 앱을 종료하지 말고 백그라운드에서 동작하게 해주세요. ',
                 ),
                 const Divider(color: Colors.white12, height: 24),
                 _buildGuideItem(
-                  icon: Icons.videocam,
-                  title: '영상 스트림',
-                  description: '차량의 전방 및 후방 카메라 영상을 실시간으로 확인합니다.',
+                  icon: Icons.battery_alert,
+                  title: '배터리 소모',
+                  description: '차량 실시간 메시지 알람 서비스를 위해 백그라운드 모드로 1분마다 상태를 체크하므로 배터리 소모가 있을 수 있습니다. 원하지 않으시면 개발자 옵션에서 \'백그라운드 서비스 중지\'를 눌러주세요.',
                 ),
                 const Divider(color: Colors.white12, height: 24),
                 _buildGuideItem(
                   icon: Icons.refresh,
                   title: '새로고침',
-                  description: '화면을 아래로 당겨서 연결을 새로고침할 수 있습니다.',
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildHelpSection(
-              title: '문제 해결',
-              icon: Icons.build,
-              iconColor: Colors.orange,
-              children: [
-                _buildTroubleshootItem(
-                  problem: '알림이 오지 않아요',
-                  solution: '위의 백그라운드 알림 설정을 모두 확인해주세요. 특히 배터리 최적화 해제가 중요합니다.',
-                ),
-                const Divider(color: Colors.white12, height: 24),
-                _buildTroubleshootItem(
-                  problem: '영상이 보이지 않아요',
-                  solution: '네트워크 연결을 확인하고, 화면을 새로고침해보세요. 문제가 지속되면 개발자 옵션에서 연결 테스트를 진행하세요.',
-                ),
-                const Divider(color: Colors.white12, height: 24),
-                _buildTroubleshootItem(
-                  problem: '앱이 느려요',
-                  solution: '개발자 옵션에서 캐시 초기화를 해보세요. 그래도 문제가 있다면 앱을 재시작해주세요.',
+                  description: '화면을 아래로 당겨서 연결을 새로고침할 수 있습니다. 버벅임이 있는 경우 앱을 껐다 키거나 개발자 옵션에서 캐시 초기화를 해주세요.',
                 ),
               ],
             ),

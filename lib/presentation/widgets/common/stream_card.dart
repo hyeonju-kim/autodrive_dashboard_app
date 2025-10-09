@@ -47,6 +47,7 @@ class StreamCard extends StatelessWidget {
                 RTCVideoView(
                   renderer,
                   objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  mirror: true, // ✅ 좌우 반전 추가
                 )
               else
                 Center(

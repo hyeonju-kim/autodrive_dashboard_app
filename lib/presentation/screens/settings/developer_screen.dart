@@ -29,132 +29,130 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.backgroundPrimary,
-      appBar: AppBar(
-        title: const Text(
-          '개발자 옵션',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        backgroundColor: AppConstants.backgroundPrimary,
+        appBar: AppBar(
+          title: const Text(
+            '개발자 옵션',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSection(
-            title: '알림 테스트',
-            icon: Icons.notifications_active,
-            iconColor: Colors.blue,
+        body: SafeArea(
+          bottom: true, // 하단 영역 확보
+          child: ListView(
+            padding: const EdgeInsets.all(16),
             children: [
-              _buildTestButton(
-                label: '즉시 알림 테스트',
-                subtitle: '알림이 정상적으로 작동하는지 확인',
-                icon: Icons.send,
-                onPressed: _testNotification,
-                isLoading: _isNotificationTesting,
+              _buildSection(
+                title: '알림 테스트',
+                icon: Icons.notifications_active,
+                iconColor: Colors.blue,
+                children: [
+                  _buildTestButton(
+                    label: '즉시 알림 테스트',
+                    subtitle: '알림이 정상적으로 작동하는지 확인',
+                    icon: Icons.send,
+                    onPressed: _testNotification,
+                    isLoading: _isNotificationTesting,
+                  ),
+                ],
               ),
-              const Divider(color: Colors.white12, height: 1),
-              _buildInfoTile(
-                icon: Icons.info_outline,
-                title: '알림 설정 확인',
-                subtitle: '설정 > 애플리케이션 > 알림에서 권한 확인',
+              const SizedBox(height: 20),
+              _buildSection(
+                title: '백그라운드 서비스',
+                icon: Icons.sync,
+                iconColor: Colors.purple,
+                children: [
+                  _buildTestButton(
+                    label: '백그라운드 상태 확인',
+                    subtitle: '서비스 실행 상태 및 데이터 수신 확인',
+                    icon: Icons.info_outline,
+                    onPressed: _checkBackgroundStatus,
+                    isLoading: _isBackgroundChecking,
+                  ),
+                  const Divider(color: Colors.white12, height: 1),
+                  _buildTestButton(
+                    label: '백그라운드 서비스 시작',
+                    subtitle: '수동으로 백그라운드 서비스 시작',
+                    icon: Icons.play_arrow,
+                    onPressed: _startBackgroundService,
+                  ),
+                  const Divider(color: Colors.white12, height: 1),
+                  _buildTestButton(
+                    label: '백그라운드 서비스 중지',
+                    subtitle: '실행 중인 백그라운드 서비스 중지',
+                    icon: Icons.stop,
+                    onPressed: _stopBackgroundService,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildSection(
+                title: '연결 테스트',
+                icon: Icons.network_check,
+                iconColor: Colors.cyan,
+                children: [
+                  _buildTestButton(
+                    label: 'MQTT 연결 테스트 - 화성',
+                    subtitle:
+                        '${AppConstants.mqttHost}:${AppConstants.mqttPortMars}',
+                    icon: Icons.cloud_queue,
+                    onPressed: _testMqttConnectionMars,
+                    isLoading: _isMqttMarsTesting,
+                  ),
+                  const Divider(color: Colors.white12, height: 1),
+                  _buildTestButton(
+                    label: 'MQTT 연결 테스트 - 제주',
+                    subtitle:
+                        '${AppConstants.mqttHost}:${AppConstants.mqttPortJeju}',
+                    icon: Icons.cloud_queue,
+                    onPressed: _testMqttConnectionJeju,
+                    isLoading: _isMqttJejuTesting,
+                  ),
+                  const Divider(color: Colors.white12, height: 1),
+                  _buildTestButton(
+                    label: 'Janus 연결 테스트',
+                    subtitle: '${AppConstants.janusServer}/info',
+                    icon: Icons.video_library,
+                    onPressed: _testJanusConnection,
+                    isLoading: _isJanusTesting,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildSection(
+                title: '앱 상태',
+                icon: Icons.memory,
+                iconColor: Colors.green,
+                children: [
+                  _buildTestButton(
+                    label: '캐시 초기화',
+                    subtitle: '임시 데이터 삭제',
+                    icon: Icons.cleaning_services,
+                    onPressed: _clearCache,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              _buildSection(
+                title: '시스템 정보',
+                icon: Icons.settings_system_daydream,
+                iconColor: Colors.teal,
+                children: [
+                  _buildInfoTile(
+                    icon: Icons.phone_android,
+                    title: 'Android SDK',
+                    subtitle: 'Target SDK 36',
+                  ),
+                  const Divider(color: Colors.white12, height: 1),
+                  _buildInfoTile(
+                    icon: Icons.code,
+                    title: 'Flutter 버전',
+                    subtitle: '3.29+',
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: '백그라운드 서비스',
-            icon: Icons.sync,
-            iconColor: Colors.purple,
-            children: [
-              _buildTestButton(
-                label: '백그라운드 상태 확인',
-                subtitle: '서비스 실행 상태 및 데이터 수신 확인',
-                icon: Icons.info_outline,
-                onPressed: _checkBackgroundStatus,
-                isLoading: _isBackgroundChecking,
-              ),
-              const Divider(color: Colors.white12, height: 1),
-              _buildTestButton(
-                label: '백그라운드 서비스 시작',
-                subtitle: '수동으로 백그라운드 서비스 시작',
-                icon: Icons.play_arrow,
-                onPressed: _startBackgroundService,
-              ),
-              const Divider(color: Colors.white12, height: 1),
-              _buildTestButton(
-                label: '백그라운드 서비스 중지',
-                subtitle: '실행 중인 백그라운드 서비스 중지',
-                icon: Icons.stop,
-                onPressed: _stopBackgroundService,
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: '연결 테스트',
-            icon: Icons.network_check,
-            iconColor: Colors.cyan,
-            children: [
-              _buildTestButton(
-                label: 'MQTT 연결 테스트 - 화성',
-                subtitle: '${AppConstants.mqttHost}:${AppConstants.mqttPortMars}',
-                icon: Icons.cloud_queue,
-                onPressed: _testMqttConnectionMars,
-                isLoading: _isMqttMarsTesting,
-              ),
-              const Divider(color: Colors.white12, height: 1),
-              _buildTestButton(
-                label: 'MQTT 연결 테스트 - 제주',
-                subtitle: '${AppConstants.mqttHost}:${AppConstants.mqttPortJeju}',
-                icon: Icons.cloud_queue,
-                onPressed: _testMqttConnectionJeju,
-                isLoading: _isMqttJejuTesting,
-              ),
-              const Divider(color: Colors.white12, height: 1),
-              _buildTestButton(
-                label: 'Janus 연결 테스트',
-                subtitle: '${AppConstants.janusServer}/info',
-                icon: Icons.video_library,
-                onPressed: _testJanusConnection,
-                isLoading: _isJanusTesting,
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: '앱 상태',
-            icon: Icons.memory,
-            iconColor: Colors.green,
-            children: [
-              _buildTestButton(
-                label: '캐시 초기화',
-                subtitle: '임시 데이터 삭제',
-                icon: Icons.cleaning_services,
-                onPressed: _clearCache,
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: '시스템 정보',
-            icon: Icons.settings_system_daydream,
-            iconColor: Colors.teal,
-            children: [
-              _buildInfoTile(
-                icon: Icons.phone_android,
-                title: 'Android SDK',
-                subtitle: 'Target SDK 36',
-              ),
-              const Divider(color: Colors.white12, height: 1),
-              _buildInfoTile(
-                icon: Icons.code,
-                title: 'Flutter 버전',
-                subtitle: '3.29+',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+        ));
   }
 
   /// 섹션 빌드
@@ -215,26 +213,26 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
       ),
       trailing: isLoading
           ? const SizedBox(
-        width: 24,
-        height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      )
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
           : Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.blue.withOpacity(0.5)),
-        ),
-        child: const Text(
-          '실행',
-          style: TextStyle(
-            color: Colors.blue,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.blue.withOpacity(0.5)),
+              ),
+              child: const Text(
+                '실행',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
       onTap: isLoading ? null : onPressed,
     );
   }

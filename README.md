@@ -7,6 +7,14 @@
 [![WebRTC](https://img.shields.io/badge/WebRTC-333333?style=for-the-badge&logo=webrtc&logoColor=white)](https://webrtc.org)
 [![MQTT](https://img.shields.io/badge/MQTT-660066?style=for-the-badge&logo=mqtt&logoColor=white)](https://mqtt.org)
 
+## 📘 프로젝트 개요
+
+자율주행 관제 시스템 고도화를 위한 **내부 실험용 프로토타입**으로,  
+연휴 기간(2025.10.07 ~ 2025.10.11) 동안 개인 주도로 개발된 프로젝트입니다.
+
+기존 관제 웹의 한계를 개선하기 위해 **Flutter 기반 크로스 플랫폼 대시보드**를 구현하여,  
+실시간 영상 + 텔레메트리 데이터를 하나의 앱에서 통합적으로 시각화하도록 설계하였습니다.
+
 ## 📋 목차
 
 - [소개](#-소개)
