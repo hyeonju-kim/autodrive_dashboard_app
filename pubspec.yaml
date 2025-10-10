@@ -38,15 +38,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.1
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/ # 앱에서 사용하는 에셋 파일 디렉터리 명시
 
+flutter_launcher_icons:
+  android: true # 안드로이드 플랫폼에 런처 아이콘 적용 여부
+  ios: false   # iOS 플랫폼에 런처 아이콘 적용 여부
+  image_path: "assets/icon/mycar.png" # 런처 아이콘으로 사용할 이미지 경로
+  min_sdk_android: 21 # 안드로이드 최소 SDK 버전 (API 21(Android 5.0) 이상)
 
-flutter_icons:
-  android: true
-  ios: true
-  image_path: "assets/icon/car.png"  # ✅ 아이콘 경로
-  adaptive_icon_background: "#ffffff"     # (선택) Android 8.0 이상 배경
-  adaptive_icon_foreground: "assets/icon/car.png"  # (선택)
