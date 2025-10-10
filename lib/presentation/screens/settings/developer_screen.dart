@@ -43,7 +43,6 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
             children: [
               _buildSection(
                 title: '알림 테스트',
-                icon: Icons.notifications_active,
                 iconColor: Colors.blue,
                 children: [
                   _buildTestButton(
@@ -57,37 +56,7 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
               ),
               const SizedBox(height: 20),
               _buildSection(
-                title: '백그라운드 서비스',
-                icon: Icons.sync,
-                iconColor: Colors.purple,
-                children: [
-                  _buildTestButton(
-                    label: '백그라운드 상태 확인',
-                    subtitle: '서비스 실행 상태 및 데이터 수신 확인',
-                    icon: Icons.info_outline,
-                    onPressed: _checkBackgroundStatus,
-                    isLoading: _isBackgroundChecking,
-                  ),
-                  const Divider(color: Colors.white12, height: 1),
-                  _buildTestButton(
-                    label: '백그라운드 서비스 시작',
-                    subtitle: '수동으로 백그라운드 서비스 시작',
-                    icon: Icons.play_arrow,
-                    onPressed: _startBackgroundService,
-                  ),
-                  const Divider(color: Colors.white12, height: 1),
-                  _buildTestButton(
-                    label: '백그라운드 서비스 중지',
-                    subtitle: '실행 중인 백그라운드 서비스 중지',
-                    icon: Icons.stop,
-                    onPressed: _stopBackgroundService,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSection(
                 title: '연결 테스트',
-                icon: Icons.network_check,
                 iconColor: Colors.cyan,
                 children: [
                   _buildTestButton(
@@ -120,7 +89,6 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
               const SizedBox(height: 20),
               _buildSection(
                 title: '앱 상태',
-                icon: Icons.memory,
                 iconColor: Colors.green,
                 children: [
                   _buildTestButton(
@@ -128,25 +96,6 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
                     subtitle: '임시 데이터 삭제',
                     icon: Icons.cleaning_services,
                     onPressed: _clearCache,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildSection(
-                title: '시스템 정보',
-                icon: Icons.settings_system_daydream,
-                iconColor: Colors.teal,
-                children: [
-                  _buildInfoTile(
-                    icon: Icons.phone_android,
-                    title: 'Android SDK',
-                    subtitle: 'Target SDK 36',
-                  ),
-                  const Divider(color: Colors.white12, height: 1),
-                  _buildInfoTile(
-                    icon: Icons.code,
-                    title: 'Flutter 버전',
-                    subtitle: '3.29+',
                   ),
                 ],
               ),
@@ -158,7 +107,6 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
   /// 섹션 빌드
   Widget _buildSection({
     required String title,
-    required IconData icon,
     required Color iconColor,
     required List<Widget> children,
   }) {
@@ -169,12 +117,11 @@ class _DeveloperScreenState extends State<DeveloperScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: iconColor),
               const SizedBox(width: 8),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.white54,
                 ),

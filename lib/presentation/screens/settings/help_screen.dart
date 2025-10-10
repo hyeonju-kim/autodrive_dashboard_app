@@ -35,40 +35,13 @@ class HelpScreen extends StatelessWidget {
               title: '백그라운드 알림 설정',
               icon: Icons.notifications_active,
               iconColor: Colors.blue,
+              context: context,
               children: [
-                _buildHelpCard(
-                  step: '1',
-                  title: '알림 권한 허용',
-                  description: '설정 > 애플리케이션 > 앱 선택 > 알림 > 알림 허용',
-                  icon: Icons.notifications,
-                ),
-                const SizedBox(height: 12),
-                _buildHelpCard(
-                  step: '2',
-                  title: '배터리 최적화 해제',
-                  description: '설정 > 애플리케이션 > 앱 선택 > 배터리 > 제한 없음',
-                  icon: Icons.battery_full,
-                ),
-                const SizedBox(height: 12),
-                _buildHelpCard(
-                  step: '3',
-                  title: '백그라운드 데이터 허용',
-                  description: '설정 > 애플리케이션 > 앱 선택 > 모바일 데이터 > 백그라운드 데이터 허용',
-                  icon: Icons.data_usage,
-                ),
-                const SizedBox(height: 12),
-                _buildHelpCard(
-                  step: '4',
-                  title: '절전모드 해제',
-                  description: '설정 > 배터리 > 절전 모드 > 사용 OFF',
-                  icon: Icons.autorenew,
-                ),
-                const SizedBox(height: 20),
-                _buildActionButton(
-                  context: context,
-                  label: '앱 설정 열기',
-                  icon: Icons.settings,
-                  onPressed: () => _openAppSettings(context),
+                _buildSimpleGuide(
+                  text: '• 알림 권한 허용\n'
+                      '• 배터리 최적화 해제\n'
+                      '• 백그라운드 데이터 허용\n'
+                      '• 절전모드 해제',
                 ),
               ],
             ),
@@ -77,6 +50,7 @@ class HelpScreen extends StatelessWidget {
               title: '앱 사용 가이드',
               icon: Icons.help_outline,
               iconColor: Colors.green,
+              context: context,
               children: [
                 _buildGuideItem(
                   icon: Icons.dashboard,
@@ -87,7 +61,7 @@ class HelpScreen extends StatelessWidget {
                 _buildGuideItem(
                   icon: Icons.notifications,
                   title: '알람 서비스',
-                  description: '차량 메시지가 종료된 후 ${AppConstants.dataTimeoutMinutes}분이 지난 후에 다시 차량 메시지가 수신될 경우 알람을 발송합니다. \n앱을 모두 종료하면 알림을 받을 수 없으니 스와이프로 앱을 종료하지 말고 백그라운드에서 동작하게 해주세요. ',
+                  description: '차량 메시지가 종료된 후 ${AppConstants.dataTimeoutMinutes}분이 지난 후에 다시 차량 메시지가 수신될 경우 알람을 발송합니다. \n앱을 모두 종료하면 알림을 받을 수 없으니 스와이프로 앱을 종료하지 말고 백그라운드에서 동작하게 해주세요.',
                 ),
                 const Divider(color: Colors.white12, height: 24),
                 _buildGuideItem(
@@ -109,13 +83,17 @@ class HelpScreen extends StatelessWidget {
     );
   }
 
-  /// 도움말 섹션
+  /// 도움말 섹션 (버튼 포함)
   Widget _buildHelpSection({
     required String title,
     required IconData icon,
     required Color iconColor,
+    required BuildContext context,
     required List<Widget> children,
   }) {
+    // 백그라운드 알림 설정 섹션인지 확인
+    final isNotificationSection = icon == Icons.notifications_active;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -125,14 +103,31 @@ class HelpScreen extends StatelessWidget {
             children: [
               Icon(icon, size: 20, color: iconColor),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
+              // 백그라운드 알림 설정일 때만 버튼 표시
+              if (isNotificationSection)
+                ElevatedButton.icon(
+                  onPressed: () => _openAppSettings(context),
+                  icon: const Icon(Icons.settings, size: 18),
+                  label: const Text('앱 설정 열기'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -152,98 +147,53 @@ class HelpScreen extends StatelessWidget {
     );
   }
 
-  /// 도움말 카드 (단계별)
-  Widget _buildHelpCard({
-    required String step,
-    required String title,
-    required String description,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppConstants.backgroundPrimary,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Center(
-              child: Text(
-                step,
-                style: const TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(icon, size: 18, color: Colors.white70),
-                    const SizedBox(width: 8),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    color: Colors.white54,
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  /// 간단한 가이드 (박스 하나로 통합, 상세 텍스트 유지)
+  Widget _buildSimpleGuide({required String text}) {
+    return Column(
+      children: [
+        _buildSettingRow('알림 권한 허용', '설정 > 애플리케이션 > 앱 선택 > 알림 > 알림 허용'),
+        const Divider(color: Colors.white12, height: 24),
+        _buildSettingRow('배터리 최적화 해제', '설정 > 애플리케이션 > 앱 선택 > 배터리 > 제한 없음'),
+        const Divider(color: Colors.white12, height: 24),
+        _buildSettingRow('백그라운드 데이터 허용', '설정 > 애플리케이션 > 앱 선택 > 모바일 데이터 > 백그라운드 데이터 허용'),
+        const Divider(color: Colors.white12, height: 24),
+        _buildSettingRow('절전모드 해제', '설정 > 배터리 > 절전 모드 > 사용 OFF'),
+      ],
     );
   }
 
-  /// 액션 버튼
-  Widget _buildActionButton({
-    required BuildContext context,
-    required String label,
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return Center(
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue[700],
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 32),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+  /// 설정 항목 행 (앱 사용가이드와 동일한 스타일)
+  Widget _buildSettingRow(String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.check_circle_outline, color: Colors.blue, size: 24),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -280,46 +230,6 @@ class HelpScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 문제 해결 항목
-  Widget _buildTroubleshootItem({
-    required String problem,
-    required String solution,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.orange, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                problem,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.only(left: 28),
-          child: Text(
-            solution,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 13,
-              height: 1.4,
-            ),
           ),
         ),
       ],

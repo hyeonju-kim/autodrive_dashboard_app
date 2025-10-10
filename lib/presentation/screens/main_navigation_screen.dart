@@ -84,7 +84,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
               labelPadding: EdgeInsets.zero,
               tabs: [
                 _buildTab('제주', 0, Colors.blue),
-                _buildTab('화성', 1, Colors.orange),
+                _buildTab('화성', 1, Colors.blue),
               ],
             ),
           ),
