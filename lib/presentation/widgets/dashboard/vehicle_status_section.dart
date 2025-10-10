@@ -94,12 +94,12 @@ class _VehicleStatusSectionState extends State<VehicleStatusSection> {
 
   Widget _buildInfoTooltip() {
     return Container(
-      width: 280,
+      width: 300,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppConstants.backgroundSecondary,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+        border: Border.all(color: Colors.blue.withOpacity(0.7), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.5),
@@ -114,32 +114,32 @@ class _VehicleStatusSectionState extends State<VehicleStatusSection> {
         children: [
           _buildInfoRow(
             '- 방향지시등',
-            'inVehicleData.turnSignal',
-            'Off: 0, Right: 1, Left: 2, 비상등: 3',
+            ' inVehicleData.turnSignal',
+            '   (Off: 0, Right: 1, Left: 2, 비상등: 3)',
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             '- 자율주행',
-            'operationStatusData.operationMode',
-            'DRIVE_AUTO일 때만 ON',
+            ' operationStatusData.operationMode',
+            '  (DRIVE_AUTO일 때만 ON)',
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             '- 브레이크',
-            'inVehicleData.brakePedal',
+            ' inVehicleData.brakePedal',
             '',
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             '- 브러시',
-            'serviceModuleData.blowerRun',
+            ' serviceModuleData.blowerRun',
             '',
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             '- 급가속/급정거',
-            'invehicleData.accelerationXMps2',
-            '양수: 급가속, 음수: 급정거',
+            ' invehicleData.accelerationXMps2',
+            '  (양수: 급가속, 음수: 급정거)',
           ),
         ],
       ),
@@ -153,18 +153,18 @@ class _VehicleStatusSectionState extends State<VehicleStatusSection> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white70,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 13,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           dataPath,
           style: TextStyle(
-            color: Colors.white54,
+            color: Colors.white,
             fontFamily: 'monospace',
-            fontSize: 13,
+            fontSize: 14,
           ),
         ),
         if (description.isNotEmpty) ...[
@@ -172,8 +172,8 @@ class _VehicleStatusSectionState extends State<VehicleStatusSection> {
           Text(
             description,
             style: TextStyle(
-              color: Colors.white38,
-              fontSize:12,
+              color: Colors.white70,
+              fontSize:13.5,
               fontStyle: FontStyle.italic,
             ),
           ),

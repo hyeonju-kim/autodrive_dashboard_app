@@ -75,12 +75,12 @@ class _GaugeSectionState extends State<GaugeSection> {
 
   Widget _buildInfoTooltip() {
     return Container(
-      width: 280,
+      width: 300,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppConstants.backgroundSecondary,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+        border: Border.all(color: Colors.blue.withOpacity(0.7), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.5),
@@ -95,12 +95,12 @@ class _GaugeSectionState extends State<GaugeSection> {
         children: [
           _buildInfoRow(
             '- 속도',
-            'inVehicleData.speedXMps',
+            ' inVehicleData.speedXMps',
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
             '- 배터리',
-            'inVehicleData.batteryGaugePercent',
+            ' inVehicleData.batteryGaugePercent',
           ),
         ],
       ),
@@ -114,18 +114,18 @@ class _GaugeSectionState extends State<GaugeSection> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white70,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 13,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           dataPath,
           style: TextStyle(
-            color: Colors.white54,
+            color: Colors.white,
             fontFamily: 'monospace',
-            fontSize: 13,
+            fontSize: 14,
           ),
         ),
       ],
