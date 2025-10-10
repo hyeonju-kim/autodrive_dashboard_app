@@ -208,6 +208,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
             child: RTCVideoView(
               widget.renderer,
               objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+              mirror: true, // 좌우 반전 추가
             ),
           ),
 

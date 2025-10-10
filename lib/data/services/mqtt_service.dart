@@ -27,7 +27,7 @@ class MqttService {
   static const String _logDataRecovery = '✅ 리셋 후 데이터 수신 - 정상 복귀 🌱🌱🌱🌱🌱🌱🌱';
   static const String _logDataReconnection = '✅ $_dataTimeoutMinutes분 이상 끊어진 후 데이터 재수신';
   static const String _logDataTimeout = '$_dataTimeoutMinutes분간 데이터 수신 없음 ❌ (상태 기록만)';
-  static const String _logResetTimeout = '리셋 후 $_dataTimeoutMinutes분간 데이터 수신 없음 ❌ (상태 기록만)';
+  static const String _logResetTimeout = '❌❌❌ 리셋 후 $_dataTimeoutMinutes분간(타임아웃시간) 데이터 수신 없음 ❌❌❌ (상태 기록만)';
 
   /// 알림 메시지 템플릿
   /// {location} - 지역명 (화성/제주)

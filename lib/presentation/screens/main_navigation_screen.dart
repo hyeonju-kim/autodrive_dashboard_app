@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'dashboard/dashboard_screen.dart';
-import 'jeju/jeju_screen.dart';
 import 'settings/settings_screen.dart';
+import '../../../core/config/app_constants.dart';
 
-/// 하단 네비게이션 바를 포함한 메인 화면
-/// 3개의 탭 (제주, 화성, 설정)을 관리
+/// 탭 기반 메인 화면
+/// 제주/화성을 탭과 스와이프로 전환
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -14,69 +14,146 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  /// 현재 선택된 탭 인덱스
-  int _currentIndex = 1; // 화성 탭을 기본으로 설정
+class _MainNavigationScreenState extends State<MainNavigationScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-  /// 각 탭에 해당하는 화면들
-  final List<Widget> _screens = [
-    const JejuScreen(),      // 0: 제주
-    const DashboardScreen(), // 1: 화성 (기존 대시보드)
-    const SettingsScreen(),  // 2: 설정
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1); // 화성부터 시작
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          backgroundColor: Colors.white,
-          selectedItemColor: Colors.blue[700],
-          unselectedItemColor: Colors.grey[600],
-          selectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
+      backgroundColor: AppConstants.backgroundPrimary,
+      appBar: AppBar(
+        backgroundColor: AppConstants.backgroundSecondary,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          '자율주행 관제 대시보드',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 12,
-          ),
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.landscape),
-              label: '제주',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_work),
-              label: '화성',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: '설정',
-            ),
-          ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings,
+              color: Colors.white70,
+              size: 24,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(40),
+          child: Transform.translate(
+            offset: const Offset(0, -8),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppConstants.backgroundSecondary,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: Colors.transparent,
+              labelPadding: EdgeInsets.zero,
+              tabs: [
+                _buildTab('제주', 0, Colors.blue),
+                _buildTab('화성', 1, Colors.orange),
+              ],
+            ),
+          ),
+        ),),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          DashboardScreen(isMars: false, hideAppBar: true), // 제주
+          DashboardScreen(isMars: true, hideAppBar: true),  // 화성
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTab(String label, int index, Color color) {
+    return AnimatedBuilder(
+      animation: _tabController.animation!,
+      builder: (context, child) {
+        // 현재 탭과의 거리 계산 (0.0 = 선택됨, 1.0 = 선택 안 됨)
+        final isSelected = _tabController.index == index;
+        final animationValue = (_tabController.animation!.value - index).abs();
+        final progress = (1.0 - animationValue).clamp(0.0, 1.0);
+
+        return Container(
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: color.withOpacity(progress * 0.8),
+                width: 3,
+              ),
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    index == 0 ? Icons.landscape : Icons.home_work,
+                    color: Color.lerp(
+                      Colors.white.withOpacity(0.5),
+                      color,
+                      progress,
+                    ),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: Color.lerp(
+                        Colors.white.withOpacity(0.5),
+                        color,
+                        progress,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

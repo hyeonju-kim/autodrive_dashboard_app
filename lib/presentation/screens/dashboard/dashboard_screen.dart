@@ -1,3 +1,5 @@
+// lib/presentation/screens/dashboard/dashboard_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/config/app_constants.dart';
@@ -12,7 +14,12 @@ import 'dashboard_controller.dart';
 /// Provider 패턴을 사용하여 상태 관리
 class DashboardScreen extends StatefulWidget {
   final bool isMars; // true: 화성, false: 제주
-  const DashboardScreen({super.key, this.isMars = true}); // 기본값: 화성
+  final bool hideAppBar; // AppBar 숨김 여부
+  const DashboardScreen({
+    super.key,
+    this.isMars = true,
+    this.hideAppBar = false,
+  }); // 기본값: 화성
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -79,7 +86,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       value: _controller,
       child: Scaffold(
         backgroundColor: AppConstants.backgroundPrimary,
-        appBar: _buildAppBar(),
+        appBar: widget.hideAppBar ? null : _buildAppBar(),
         body: Stack(
           children: [
             _buildBody(),
@@ -92,59 +99,19 @@ class _DashboardScreenState extends State<DashboardScreen>
   /// 앱바 빌드
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: Consumer<DashboardController>(
-        builder: (context, controller, child) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                controller.isMars ? Icons.home_work : Icons.landscape,
-                color: controller.isMars ? Colors.orange : Colors.blue,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                '자율주행 관제 대시보드',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: controller.isMars
-                      ? Colors.orange.withOpacity(0.2)
-                      : Colors.blue.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: controller.isMars
-                        ? Colors.orange.withOpacity(0.5)
-                        : Colors.blue.withOpacity(0.5),
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  controller.isMars ? '화성' : '제주',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: controller.isMars ? Colors.orange : Colors.blue,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
+      title: const Text(
+        '자율주행 관제 대시보드',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
       centerTitle: true,
       elevation: 0,
       backgroundColor: AppConstants.backgroundSecondary,
     );
   }
-
 
   Widget _buildBody() {
     return Consumer<DashboardController>(
@@ -162,14 +129,14 @@ class _DashboardScreenState extends State<DashboardScreen>
               // 차량 정보 섹션
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                 decoration: BoxDecoration(
                   color: AppConstants.backgroundSecondary.withOpacity(0.5),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2),
                       blurRadius: 5,
-                      offset: const Offset(0, 2),
+                      offset: const Offset(0, -2),
                     ),
                   ],
                 ),
@@ -226,7 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             renderer: controller.stream1.renderer,
                             isConnected: snapshot.data ?? false,
                             isOperationEnded:
-                                controller.isOperationEnded, // 운행 종료 상태 전달
+                            controller.isOperationEnded, // 운행 종료 상태 전달
                           );
                         },
                       ),
@@ -242,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             renderer: controller.stream2.renderer,
                             isConnected: snapshot.data ?? false,
                             isOperationEnded:
-                                controller.isOperationEnded, // 운행 종료 상태 전달
+                            controller.isOperationEnded, // 운행 종료 상태 전달
                           );
                         },
                       ),

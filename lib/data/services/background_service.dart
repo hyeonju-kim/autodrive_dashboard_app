@@ -195,19 +195,19 @@ void onStart(ServiceInstance service) async {
   const initSettings = InitializationSettings(android: androidSettings);
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  Logger.log('[백그라운드] 서비스 시작됨 - ${DateTime.now()}');
+  Logger.log('[⬛백그라운드⬛] 서비스 시작됨 - ${DateTime.now()}');
 
   // 'stopService' 이벤트 리스너 등록
   // stopService() 메서드가 호출되면 이 이벤트가 발생
   service.on('stopService').listen((event) {
-    Logger.log('[백그라운드] 서비스 중지 요청받음');
+    Logger.log('[⬛백그라운드⬛] 서비스 중지 요청받음');
     service.stopSelf();
   });
 
   // 주기적 작업 설정 (1분마다 실행)
   // 실제 운영 환경에서는 배터리 소모를 고려하여 주기를 조정해야 함
   Timer.periodic(Duration(minutes: BackgroundService._checkIntervalMinutes), (timer) async {
-    Logger.log('[백그라운드] 상태 체크 시작 - ${DateTime.now()}');
+    Logger.log('[⬛백그라운드⬛] 상태 체크 시작 - ${DateTime.now()}');
 
     // SharedPreferences에서 데이터 읽기
     final prefs = await SharedPreferences.getInstance();
@@ -221,10 +221,10 @@ void onStart(ServiceInstance service) async {
       final diff = DateTime.now().difference(lastDataDateTime);
       final minutes = diff.inMinutes;
       final seconds = diff.inSeconds % 60;
-      Logger.log('[백그라운드] 차량ID: $vehicleId, 마지막 데이터: ${lastDataDateTime.toString()}, 경과시간: $minutes분 $seconds초');
+      Logger.log('[⬛백그라운드⬛] 차량ID: $vehicleId, 마지막 데이터: ${lastDataDateTime.toString()}, 경과시간: $minutes분 $seconds초');
 
     } else {
-      Logger.log('[백그라운드] 저장된 데이터 없음');
+      Logger.log('[⬛백그라운드⬛] 저장된 데이터 없음');
     }
 
     // 차량 상태 및 연결 상태 확인
@@ -232,14 +232,14 @@ void onStart(ServiceInstance service) async {
 
     if (alertInfo != null) {
       // 문제가 감지되면 사용자에게 알림 발송
-      Logger.log('[백그라운드] 알림 발송: ${alertInfo['title']} - ${alertInfo['body']}');
+      Logger.log('[⬛백그라운드⬛] 알림 발송: ${alertInfo['title']} - ${alertInfo['body']}');
       await showNotification(
         flutterLocalNotificationsPlugin,
         alertInfo['title']!,
         alertInfo['body']!,
       );
     } else {
-      Logger.log('[백그라운드] 정상 상태 - 알림 없음');
+      Logger.log('[⬛백그라운드⬛] 정상 상태 - 알림 없음');
     }
 
     // Android 플랫폼에서만 포그라운드 서비스 알림 업데이트
@@ -279,11 +279,11 @@ Future<Map<String, String>?> checkVehicleStatus() async {
   final resetTime = prefs.getInt(BackgroundService._keyResetTime) ?? 0;
   final isResetState = prefs.getBool(BackgroundService._keyIsResetState) ?? false;
 
-  Logger.log('[백그라운드] checkVehicleStatus - wasDisconnected: $wasDisconnected, isResetState: $isResetState');
+  Logger.log('[⬛백그라운드⬛] checkVehicleStatus - wasDisconnected: $wasDisconnected, isResetState: $isResetState');
 
   // 차량 정보가 없으면 모니터링하지 않음
   if (vehicleId == null) {
-    Logger.log('[백그라운드] 차량 정보 없음 - 모니터링 중단');
+    Logger.log('[⬛백그라운드⬛] 차량 정보 없음 - 모니터링 중단');
     return null;
   }
 
@@ -298,7 +298,7 @@ Future<Map<String, String>?> checkVehicleStatus() async {
     final resetTimeDiff = now - resetTime;
     final resetTimeDiffMinutes = resetTimeDiff / 1000 / 60;
 
-    Logger.log('[백그라운드] 리셋 후 데이터 수신 - 리셋으로부터 경과시간: ${resetTimeDiffMinutes.toStringAsFixed(1)}분');
+    Logger.log('[⬛백그라운드⬛] 리셋 후 데이터 수신 - 리셋으로부터 경과시간: ${resetTimeDiffMinutes.toStringAsFixed(1)}분');
 
     // 10분 이상 경과했으면 알림 발송
     if (resetTimeDiffMinutes >= BackgroundService._dataTimeoutMinutes && BackgroundService._enableReconnectionNotification) {
@@ -309,7 +309,7 @@ Future<Map<String, String>?> checkVehicleStatus() async {
           .replaceAll('{location}', location)
           .replaceAll('{vehicle}', vehicleInfo);
 
-      Logger.log('[백그라운드] ✅ 리셋 재연결 알림 발송! (${resetTimeDiffMinutes.toStringAsFixed(1)}분 동안 끊어졌었음)');
+      Logger.log('[⬛백그라운드⬛] ✅ 리셋 재연결 알림 발송! (${resetTimeDiffMinutes.toStringAsFixed(1)}분 동안 끊어졌었음)');
       return {
         'title': title,
         'body': BackgroundService._notificationBodyTemplate,
@@ -331,7 +331,7 @@ Future<Map<String, String>?> checkVehicleStatus() async {
           .replaceAll('{location}', location)
           .replaceAll('{vehicle}', vehicleInfo);
 
-      Logger.log('[백그라운드] ✅ 일반 재연결 알림 발송! (${disconnectedMinutes.toStringAsFixed(1)}분 동안 끊어졌었음)');
+      Logger.log('[⬛백그라운드⬛] ✅ 일반 재연결 알림 발송! (${disconnectedMinutes.toStringAsFixed(1)}분 동안 끊어졌었음)');
       return {
         'title': title,
         'body': BackgroundService._notificationBodyTemplate,
@@ -339,7 +339,7 @@ Future<Map<String, String>?> checkVehicleStatus() async {
     }
   }
 
-  Logger.log('[백그라운드] 정상 상태 - 알림 없음');
+  Logger.log('[⬛백그라운드⬛] 정상 상태 - 알림 없음');
   return null;
 }
 
