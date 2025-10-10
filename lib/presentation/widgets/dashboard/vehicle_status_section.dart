@@ -7,7 +7,7 @@ import '../ui/status_button.dart';
 
 /// 차량 상태 통합 섹션
 /// 방향 지시등과 각종 상태 표시를 하나의 섹션으로 통합
-class VehicleStatusSection extends StatelessWidget {
+class VehicleStatusSection extends StatefulWidget {
   /// 방향 지시등 상태
   final int turnSignal;
 
@@ -36,73 +36,113 @@ class VehicleStatusSection extends StatelessWidget {
     required this.harshDriving,
   });
 
-  void _showInfoDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppConstants.backgroundSecondary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Icon(Icons.info_outline, color: Colors.amber, size: 24),
-              const SizedBox(width: 8),
-              const Text(
-                '차량 상태 데이터 정보',
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+  @override
+  State<VehicleStatusSection> createState() => _VehicleStatusSectionState();
+}
+
+class _VehicleStatusSectionState extends State<VehicleStatusSection> {
+  OverlayEntry? _overlayEntry;
+  final LayerLink _layerLink = LayerLink();
+
+  void _toggleTooltip() {
+    if (_overlayEntry != null) {
+      _removeOverlay();
+    } else {
+      _showOverlay();
+    }
+  }
+
+  void _showOverlay() {
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry?.dispose();
+    _overlayEntry = null;
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => Material(
+        color: Colors.transparent,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _removeOverlay,
+          child: Container(
+            color: Colors.black.withOpacity(0.3),
+            child: Stack(
               children: [
-                _buildInfoRow(
-                  '방향지시등',
-                  'inVehicleData.turnSignal',
-                  'Off: 0, Right: 1, Left: 2, 비상등: 3',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  '자율주행',
-                  'operationStatusData.operationMode',
-                  'DRIVE_AUTO일 때만 ON',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  '브레이크',
-                  'inVehicleData.brakePedal',
-                  '',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  '브러시',
-                  'serviceModuleData.blowerRun',
-                  '',
-                ),
-                const SizedBox(height: 12),
-                _buildInfoRow(
-                  '급가속/급정거',
-                  'invehicleData.accelerationXMps2',
-                  '양수: 급가속, 음수: 급정거',
+                CompositedTransformFollower(
+                  link: _layerLink,
+                  targetAnchor: Alignment.topRight,
+                  followerAnchor: Alignment.topRight,
+                  offset: const Offset(-40, 0),
+                  child: GestureDetector(
+                    onTap: () {}, // 툴팁 클릭 시 닫히지 않게
+                    child: _buildInfoTooltip(),
+                  ),
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                '확인',
-                style: TextStyle(color: Colors.amber),
-              ),
-            ),
-          ],
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoTooltip() {
+    return Container(
+      width: 280,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppConstants.backgroundSecondary,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildInfoRow(
+            '- 방향지시등',
+            'inVehicleData.turnSignal',
+            'Off: 0, Right: 1, Left: 2, 비상등: 3',
+          ),
+          const SizedBox(height: 8),
+          _buildInfoRow(
+            '- 자율주행',
+            'operationStatusData.operationMode',
+            'DRIVE_AUTO일 때만 ON',
+          ),
+          const SizedBox(height: 8),
+          _buildInfoRow(
+            '- 브레이크',
+            'inVehicleData.brakePedal',
+            '',
+          ),
+          const SizedBox(height: 8),
+          _buildInfoRow(
+            '- 브러시',
+            'serviceModuleData.blowerRun',
+            '',
+          ),
+          const SizedBox(height: 8),
+          _buildInfoRow(
+            '- 급가속/급정거',
+            'invehicleData.accelerationXMps2',
+            '양수: 급가속, 음수: 급정거',
+          ),
+        ],
+      ),
     );
   }
 
@@ -115,10 +155,10 @@ class VehicleStatusSection extends StatelessWidget {
           style: TextStyle(
             color: Colors.white70,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 13,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           dataPath,
           style: TextStyle(
@@ -128,18 +168,24 @@ class VehicleStatusSection extends StatelessWidget {
           ),
         ),
         if (description.isNotEmpty) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: 1),
           Text(
             description,
             style: TextStyle(
               color: Colors.white38,
-              fontSize: 12,
+              fontSize:12,
               fontStyle: FontStyle.italic,
             ),
           ),
         ],
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
   }
 
   @override
@@ -163,8 +209,8 @@ class VehicleStatusSection extends StatelessWidget {
             children: [
               // 방향 지시등 부분
               TurnSignalWidget(
-                turnSignal: turnSignal,
-                animation: blinkAnimation,
+                turnSignal: widget.turnSignal,
+                animation: widget.blinkAnimation,
               ),
 
               const SizedBox(height: 16),
@@ -196,26 +242,26 @@ class VehicleStatusSection extends StatelessWidget {
                   StatusButton(
                     icon: Icons.directions_car,
                     label: '자율주행',
-                    isOn: isAutoDrive,
+                    isOn: widget.isAutoDrive,
                     onColor: Colors.blue,
                   ),
                   // 브레이크 상태
                   StatusButton(
                     icon: Icons.local_parking,
                     label: '브레이크',
-                    isOn: isBraking,
+                    isOn: widget.isBraking,
                     onColor: Colors.green[600]!,
                   ),
                   // 브러시 상태
                   StatusButton(
                     icon: Icons.cleaning_services,
                     label: '브러쉬',
-                    isOn: isBrushOn,
+                    isOn: widget.isBrushOn,
                     onColor: Colors.pink[600]!,
                   ),
                   // 급가속/급정거 상태
                   HarshDrivingButton(
-                    harshDriving: harshDriving,
+                    harshDriving: widget.harshDriving,
                   ),
                 ],
               ),
@@ -225,13 +271,13 @@ class VehicleStatusSection extends StatelessWidget {
           Positioned(
             top: 0,
             right: 0,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _showInfoDialog(context),
-                borderRadius: BorderRadius.circular(20),
+            child: CompositedTransformTarget(
+              link: _layerLink,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque, // 투명 영역도 클릭 가능하게
+                onTap: _toggleTooltip,
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(2),
                   child: Icon(
                     Icons.info_outline,
                     color: Colors.white38,

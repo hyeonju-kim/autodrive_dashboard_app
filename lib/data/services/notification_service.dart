@@ -72,9 +72,6 @@ class NotificationService {
     Logger.log('🔵 알림 표시 시도');
 
     try {
-      final now = DateTime.now();
-      final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-
       const androidDetails = AndroidNotificationDetails(
         _channelId,
         _channelName,
@@ -96,10 +93,9 @@ class NotificationService {
 
       await _notifications.show(
         id,
-        title ?? '자율주행 관제 알림 테스트',
-        body ?? '지금은 $formattedDate입니다.',
+        title ?? '자율주행 임시앱',
+        body ?? '알림 테스트',
         details,
-        payload: formattedDate,
       );
 
       Logger.log('✅ 알림 표시 완료: ID=$id');

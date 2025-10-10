@@ -56,13 +56,13 @@ class BackgroundService {
   static Future<void> initialize() async {
     final service = FlutterBackgroundService();
 
-    // Android 알림 채널 생성
-    // Android 8.0(API 26) 이상에서는 모든 알림이 채널에 할당되어야 함
+    // ✅ 최소 중요도로 알림 채널 생성 (silent로 변경)
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'vehicle_monitoring', // 채널 ID (고유해야 함)
       '차량 모니터링', // 채널 이름 (사용자에게 표시됨)
-      description: '차량 상태를 실시간으로 모니터링합니다.', // 채널 설명
-      importance: Importance.low, // 중요도 설정 (low: 소리 없음, 상태바에만 표시)
+      description: '차량 상태를 실시간으로 모니터링합니다.',
+      importance: Importance.min, // ✅ low → min으로 변경 (가장 낮은 우선순위)
+      showBadge: false, // ✅ 배지 숨김
     );
 
     // Flutter 로컬 알림 플러그인 인스턴스 생성
@@ -78,36 +78,20 @@ class BackgroundService {
 
     // 백그라운드 서비스 구성
     await service.configure(
-      // Android 설정
       androidConfiguration: AndroidConfiguration(
-        // 백그라운드에서 실행될 함수 지정 (최상위 함수여야 함)
         onStart: onStart,
-
-        // 앱 시작 시 자동으로 서비스 시작
         autoStart: true,
-
-        // 포그라운드 서비스로 실행 (Android 8.0 이상에서 백그라운드 제한 회피)
         isForegroundMode: true,
-
-        // 포그라운드 서비스 알림에 사용할 채널 ID
         notificationChannelId: 'vehicle_monitoring',
-
-        // 포그라운드 서비스 알림의 초기 제목
+        // ✅ 더 간결한 알림 메시지
         initialNotificationTitle: '차량 모니터링 중',
-
-        // 포그라운드 서비스 알림의 초기 내용
-        initialNotificationContent: '백그라운드에서 차량 상태를 확인하고 있습니다.',
-
-        // 포그라운드 서비스 알림 ID (고유해야 함)
+        initialNotificationContent: '백그라운드 실행 중',
         foregroundServiceNotificationId: 888,
       ),
 
       // iOS 설정
       iosConfiguration: IosConfiguration(
-        // iOS에서도 자동 시작 활성화
         autoStart: true,
-
-        // iOS에서 포그라운드 상태일 때 실행할 함수
         onForeground: onStart,
       ),
     );
@@ -119,13 +103,9 @@ class BackgroundService {
   /// 주로 사용자가 설정에서 서비스를 수동으로 켜고 끌 때 사용합니다.
   static Future<void> startService() async {
     final service = FlutterBackgroundService();
-
-    // 서비스가 이미 실행 중인지 확인
-    var isRunning = await service.isRunning();
-
-    // 실행 중이 아니라면 시작
+    var isRunning = await service.isRunning(); // 서비스가 이미 실행 중인지 확인
     if (!isRunning) {
-      service.startService();
+      service.startService(); // 실행 중이 아니라면 시작
     }
   }
 
@@ -135,11 +115,7 @@ class BackgroundService {
   /// onStart 함수에서 이 이벤트를 수신하여 처리합니다.
   static Future<void> stopService() async {
     final service = FlutterBackgroundService();
-
-    // 서비스가 실행 중인지 확인
     var isRunning = await service.isRunning();
-
-    // 실행 중이라면 중지 이벤트 전송
     if (isRunning) {
       service.invoke("stopService");
     }
@@ -154,18 +130,14 @@ class BackgroundService {
     String? vehicleNumber,
     int? port,
     bool isReset = false,
-    DateTime? resetTime,  // 리셋 시간 파라미터 추가
+    DateTime? resetTime,
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
       final currentTime = DateTime.now().millisecondsSinceEpoch;
 
-      // 현재 시간을 마지막 데이터 수신 시간으로 저장
-      await prefs.setInt(_keyLastDataTime, currentTime);
-
-      // 차량 정보 저장
-      await prefs.setString(_keyVehicleId, vehicleId);
+      await prefs.setInt(_keyLastDataTime, currentTime); // 현재 시간을 마지막 데이터 수신 시간으로 저장
+      await prefs.setString(_keyVehicleId, vehicleId); // 차량 정보 저장
       if (vehicleNumber != null) {
         await prefs.setString(_keyVehicleNumber, vehicleNumber);
       }
@@ -193,11 +165,6 @@ class BackgroundService {
 
       // 명시적으로 저장
       await prefs.reload();
-
-      // 저장 후 확인 로그
-      final savedTime = prefs.getInt(_keyLastDataTime);
-      // Logger.log('[메인앱] SharedPreferences 업데이트 완료 - 저장된 시간: ${DateTime.fromMillisecondsSinceEpoch(savedTime ?? 0)}');
-
     } catch (e) {
       Logger.log('[메인앱] SharedPreferences 업데이트 실패: $e');
     }
@@ -228,20 +195,18 @@ void onStart(ServiceInstance service) async {
   const initSettings = InitializationSettings(android: androidSettings);
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  // 서비스 시작 로그
   Logger.log('[백그라운드] 서비스 시작됨 - ${DateTime.now()}');
 
   // 'stopService' 이벤트 리스너 등록
   // stopService() 메서드가 호출되면 이 이벤트가 발생
   service.on('stopService').listen((event) {
     Logger.log('[백그라운드] 서비스 중지 요청받음');
-    service.stopSelf(); // 서비스 자체 종료
+    service.stopSelf();
   });
 
   // 주기적 작업 설정 (1분마다 실행)
   // 실제 운영 환경에서는 배터리 소모를 고려하여 주기를 조정해야 함
   Timer.periodic(Duration(minutes: BackgroundService._checkIntervalMinutes), (timer) async {
-    // 체크 시작 로그
     Logger.log('[백그라운드] 상태 체크 시작 - ${DateTime.now()}');
 
     // SharedPreferences에서 데이터 읽기
@@ -282,13 +247,11 @@ void onStart(ServiceInstance service) async {
     if (service is AndroidServiceInstance) {
       // 포그라운드 서비스가 활성화되어 있는지 확인
       if (await service.isForegroundService()) {
-        // 포그라운드 서비스 알림 내용 업데이트
-        // 사용자에게 서비스가 정상 작동 중임을 알림
-        // Logger.log('[백그라운드] 포그라운드 알림 업데이트');
-        service.setForegroundNotificationInfo(
-          title: "차량 모니터링 중",
-          content: "마지막 확인: ${DateTime.now().toString().substring(11, 19)}",
-        );
+        // ✅ 알림 업데이트 주석 처리 (고정 알림 변경 안 함)
+        // service.setForegroundNotificationInfo(
+        //   title: "차량 모니터링 중",
+        //   content: "마지막 확인: ${DateTime.now().toString().substring(11, 19)}",
+        // );
       }
     }
   });
@@ -304,8 +267,6 @@ void onStart(ServiceInstance service) async {
 /// - null: 정상 상태, 알림 불필요
 Future<Map<String, String>?> checkVehicleStatus() async {
   final prefs = await SharedPreferences.getInstance();
-
-  // SharedPreferences 강제 새로고침
   await prefs.reload();
 
   // 저장된 상태 정보 읽기
@@ -318,7 +279,6 @@ Future<Map<String, String>?> checkVehicleStatus() async {
   final resetTime = prefs.getInt(BackgroundService._keyResetTime) ?? 0;
   final isResetState = prefs.getBool(BackgroundService._keyIsResetState) ?? false;
 
-  // 디버깅 로그
   Logger.log('[백그라운드] checkVehicleStatus - wasDisconnected: $wasDisconnected, isResetState: $isResetState');
 
   // 차량 정보가 없으면 모니터링하지 않음
@@ -388,19 +348,14 @@ Future<Map<String, String>?> checkVehicleStatus() async {
 /// MQTT 서비스의 로직과 동일하게 구현
 /// AppConstants를 직접 참조할 수 없으므로 하드코딩
 String _getLocationName(String vehicleId, int? port) {
-  // AppConstants의 실제 vehicleId 값 사용
-
-  // 화성 차량
   if (vehicleId == 'f4FwwkGR') {
     return '화성';
   }
 
-  // 제주 차량
   if (vehicleId == 'VEHICLEID') {
     return '제주';
   }
 
-  // 포트 번호로도 구분 가능 (vehicleId가 없거나 잘못된 경우)
   if (port == 38083) {
     return '화성';
   } else if (port == 28083) {
@@ -414,11 +369,6 @@ String _getLocationName(String vehicleId, int? port) {
 ///
 /// 사용자의 기기에 알림을 표시합니다.
 /// 백그라운드에서도 작동하며, 알림을 탭하면 앱이 열립니다.
-///
-/// Parameters:
-/// - plugin: 알림 플러그인 인스턴스
-/// - title: 알림 제목
-/// - body: 알림 내용
 Future<void> showNotification(
     FlutterLocalNotificationsPlugin plugin,
     String title,
@@ -426,28 +376,24 @@ Future<void> showNotification(
     ) async {
   // Android 알림 상세 설정
   const androidDetails = AndroidNotificationDetails(
-    'vehicle_alerts', // 채널 ID (알림 채널과 연결)
-    '차량 알림', // 채널 이름
-    channelDescription: '차량 상태 알림', // 채널 설명
-    importance: Importance.high, // 중요도 (high: 소리와 헤드업 알림)
-    priority: Priority.high, // 우선순위 (high: 즉시 표시)
-    icon: '@mipmap/ic_launcher', // 알림 아이콘
-    playSound: true, // 소리 재생
-    enableVibration: true, // 진동
-    autoCancel: true, // 탭하면 자동 제거
+    'vehicle_alerts',
+    '차량 알림',
+    channelDescription: '차량 상태 알림',
+    importance: Importance.high,
+    priority: Priority.high,
+    icon: '@mipmap/ic_launcher',
+    playSound: true,
+    enableVibration: true,
+    autoCancel: true,
   );
 
-  // 플랫폼별 알림 설정 통합
   const details = NotificationDetails(android: androidDetails);
-
-  // 알림 표시
-  // ID를 32비트 정수 범위로 제한
   final id = DateTime.now().millisecondsSinceEpoch % 2147483647;
 
   await plugin.show(
-    id, // 수정된 알림 ID (32비트 범위)
-    title, // 알림 제목
-    body, // 알림 내용
-    details, // 알림 상세 설정
+    id,
+    title,
+    body,
+    details,
   );
 }
