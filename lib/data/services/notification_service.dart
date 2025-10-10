@@ -98,7 +98,7 @@ class NotificationService {
         details,
       );
 
-      Logger.log('✅ 알림 표시 완료: ID=$id');
+      Logger.log('✅✅✅✅✅ 알림 표시 완료: ID=$id');
     } catch (e) {
       Logger.log('❌ 알림 표시 실패: $e');
     }

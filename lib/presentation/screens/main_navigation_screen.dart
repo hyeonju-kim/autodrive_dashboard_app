@@ -126,16 +126,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    index == 0 ? Icons.landscape : Icons.home_work,
-                    color: Color.lerp(
-                      Colors.white.withOpacity(0.5),
-                      color,
-                      progress,
-                    ),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
                   Text(
                     label,
                     style: TextStyle(

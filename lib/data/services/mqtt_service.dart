@@ -190,18 +190,6 @@ class MqttService {
             _isResetState = false;
             _resetTime = null;
           }
-
-          // 일반 타임아웃 후 재연결된 경우
-          else if (_wasDisconnected) {
-            Logger.log(_logDataReconnection);
-            _wasDisconnected = false;
-
-            // 재연결 알림 발송
-            if (_enableReconnectionNotification) {
-              _sendReconnectionNotification();
-            }
-          }
-
           // 타이머 리셋
           _resetDataTimer();
 
