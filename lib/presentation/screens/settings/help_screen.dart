@@ -61,7 +61,7 @@ class HelpScreen extends StatelessWidget {
                 _buildGuideItem(
                   icon: Icons.notifications,
                   title: '알람 서비스',
-                  description: '차량 메시지가 종료된 후 ${AppConstants.dataTimeoutMinutes}분이 지난 후에 다시 차량 메시지가 수신될 경우 알람을 발송합니다. \n앱을 모두 종료하면 알림을 받을 수 없으니 스와이프로 앱을 종료하지 말고 백그라운드에서 동작하게 해주세요.',
+                  description: '차량 메시지가 종료된 후 ${AppConstants.dataTimeoutMinutes}분이 지난 후에 다시 차량 메시지가 수신될 경우 알람을 발송합니다. \n앱을 모두 종료하면 알림을 받을 수 없으니 스와이프로 앱을 종료하지 말고 백그라운드에서 동작하게 해주세요. \n알람은 최대 ${AppConstants.maxAlarmCount}개 까지 저장되며 알람 페이지에서 확인할 수 있습니다.',
                 ),
                 const Divider(color: Colors.white12, height: 24),
                 _buildGuideItem(

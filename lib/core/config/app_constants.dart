@@ -70,6 +70,7 @@ class AppConstants {
   /// ######################################################################
   // UI 설정
   static const int maxLogCount = 100;
+  static const int maxAlarmCount = 100;
   static const double speedMaxKmh = 50.0;
 
   // 색상

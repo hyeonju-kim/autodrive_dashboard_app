@@ -1,8 +1,12 @@
 // lib/data/services/notification_service.dart
 
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import '../../core/utils/logger.dart';
+import '../../data/repositories/notification_repository.dart';
+import '../../data/models/notification_item.dart';
 
 /// 📢 알림 서비스
 /// 앱에서 사용자에게 알림을 표시하는 서비스
@@ -18,6 +22,16 @@ class NotificationService {
   // 🔔 Flutter Local Notifications 플러그인 인스턴스
   static final FlutterLocalNotificationsPlugin _notifications =
   FlutterLocalNotificationsPlugin();
+
+  // 🚨 내부 알림 발생/상태 변경 스트림
+  static final _newNotificationController = StreamController<void>.broadcast();
+  static Stream<void> get newNotificationStream =>
+      _newNotificationController.stream;
+
+  /// 🔄 외부에서 강제로 상태 갱신을 알리고 싶을 때 호출
+  static void notifyStateChanged() {
+    _newNotificationController.add(null);
+  }
 
   /// 🚀 알림 서비스 초기화
   /// 앱 시작 시 main.dart에서 호출해야 함
@@ -91,6 +105,7 @@ class NotificationService {
       // ID를 32비트 범위로 제한
       final id = DateTime.now().millisecondsSinceEpoch % 2147483647;
 
+      /// ① 실제 알림 표시
       await _notifications.show(
         id,
         title ?? '자율주행 임시앱',
@@ -99,6 +114,20 @@ class NotificationService {
       );
 
       Logger.log('✅✅✅✅✅ 알림 표시 완료: ID=$id');
+
+      /// ② 내부에 저장
+      await NotificationRepository.addNotification(
+        NotificationItem(
+          title: title ?? '자율주행 임시앱',
+          body: body ?? '알림 테스트',
+          timestamp: DateTime.now(),
+          isRead: false,
+        ),
+      );
+      _newNotificationController.add(null); // 새 알림 발생 신호 (UI 즉시 갱신)
+
+
+      Logger.log('알림 저장소에 저장 완료: ID=$id');
     } catch (e) {
       Logger.log('❌ 알림 표시 실패: $e');
     }

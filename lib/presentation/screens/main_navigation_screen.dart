@@ -1,7 +1,10 @@
 // lib/presentation/screens/main_navigation_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../data/repositories/notification_repository.dart';
+import '../../data/services/notification_service.dart';
 import 'dashboard/dashboard_screen.dart';
+import 'notifications/notification_list_screen.dart';
 import 'settings/settings_screen.dart';
 import '../../../core/config/app_constants.dart';
 
@@ -17,11 +20,25 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _hasUnreadNotifications = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: 1); // 화성부터 시작
+    _checkUnreadNotifications();
+
+    // ✅ 새 알림 들어오면 즉시 UI 갱신
+    NotificationService.newNotificationStream.listen((_) {
+      _checkUnreadNotifications();
+    });
+  }
+
+  Future<void> _checkUnreadNotifications() async {
+    final list = await NotificationRepository.getAllNotifications();
+    // 안읽은 알림 존재 여부 판단
+    final hasUnread = list.any((n) => n.isRead == false);
+    if (mounted) setState(() => _hasUnreadNotifications = hasUnread);
   }
 
   @override
@@ -47,6 +64,40 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
           ),
         ),
         actions: [
+          IconButton(
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications_outlined, color: Colors.white70, size: 24),
+                // 🔴 읽지 않은 알림 있을 때만 표시
+                if (_hasUnreadNotifications)
+                  Positioned(
+                    right: 3, // 아이콘 오른쪽 위로 살짝
+                    top: 3,
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: () async {
+              setState(() => _hasUnreadNotifications = false); // 버튼 누르는 즉시 빨간 점 제거
+
+              // ✅ Navigator.push() 끝나고 돌아오면 자동으로 다시 체크
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationListScreen()),
+              ).then((_) { // 알림 목록에서 뒤로가기 시점에 재조회 (배지 상태 일치)
+                _checkUnreadNotifications();
+              });
+            },
+          ),
+
           IconButton(
             icon: const Icon(
               Icons.settings,
