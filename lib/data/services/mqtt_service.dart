@@ -52,6 +52,7 @@ class MqttService {
   bool _wasDisconnected = false;
   bool _isResetState = false;
   DateTime? _resetTime;  // 리셋 시간 추가
+  bool _isDisposed = false;
 
   Stream<VehicleData> get vehicleDataStream => _vehicleDataController.stream;
 
@@ -78,6 +79,11 @@ class MqttService {
       // 고유한 클라이언트 ID 생성 (타임스탬프 사용)
       final clientId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
       Logger.log('🆔 MQTT Client ID: $clientId');
+      Logger.log('🔌 연결 포트: $port');  // 포트 로깅 추가
+
+      // WebSocket URL 로깅
+      final wsUrl = 'ws://${AppConstants.mqttHost}${AppConstants.mqttPath}';
+      Logger.log('🌐 WebSocket URL: $wsUrl');
 
       // MQTT 클라이언트 생성 (WebSocket 사용)
       _client = MqttServerClient.withPort(
@@ -118,11 +124,15 @@ class MqttService {
       _connectionController.add(false);
       rethrow;
     }
+    // 상세 로깅 활성화 (디버깅용)
+    _client!.logging(on: true);  // false를 true로 변경
   }
 
   /// MQTT 연결 성공 시 호출되는 콜백
   /// 토픽을 구독하고 메시지 수신을 시작
   void _onConnected() {
+    if (_isDisposed) return;
+
     Logger.log('✅ MQTT 연결 성공');
     _connectionController.add(true);
 
@@ -260,11 +270,15 @@ class MqttService {
   }
 
   void _onDisconnected() {
+    if (_isDisposed) return;
+
     Logger.log('🔌 MQTT 연결 해제됨');
     _connectionController.add(false);
   }
 
   void dispose() {
+    _isDisposed = true;
+
     _dataTimeoutTimer?.cancel();
     _client?.disconnect();
     _vehicleDataController.close();

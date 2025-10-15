@@ -73,6 +73,10 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   @override
   void dispose() {
+    // 컨트롤러 dispose 전에 mounted 체크
+    if (mounted) {
+      _controller.dispose();
+    }
     _controller.removeListener(_handleLogVisibilityChange);
     _controller.dispose();
     _blinkController.dispose();
@@ -194,6 +198,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             isConnected: snapshot.data ?? false,
                             isOperationEnded:
                             controller.isOperationEnded, // 운행 종료 상태 전달
+                            enableMirror: widget.isMars, // 화성일 때만 true
                           );
                         },
                       ),
@@ -210,6 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                             isConnected: snapshot.data ?? false,
                             isOperationEnded:
                             controller.isOperationEnded, // 운행 종료 상태 전달
+                            enableMirror: widget.isMars, // 화성일 때만 true
                           );
                         },
                       ),

@@ -14,6 +14,8 @@ import '../../../data/services/janus_service.dart';
 class DashboardController extends ChangeNotifier {
   // ===== 지역 구분 =====
   final bool isMars; // true: 화성, false: 제주
+  bool _isDisposed = false;  // 추가
+
 
   // ===== 서비스 =====
   final MqttService _mqttService = MqttService();
@@ -90,8 +92,17 @@ class DashboardController extends ChangeNotifier {
   }
 
   void _updateTime() {
+    if (_isDisposed) return;  // 체크 추가
     _currentTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     notifyListeners();
+  }
+
+  // 모든 notifyListeners() 호출 전에 체크
+  @override
+  void notifyListeners() {
+    if (!_isDisposed) {
+      super.notifyListeners();
+    }
   }
 
   Future<void> _connectMqtt() async {
@@ -135,6 +146,7 @@ class DashboardController extends ChangeNotifier {
   }
 
   void _handleReset() {
+    if (_isDisposed) return;  // 체크 추가
     Logger.log('🔄 ${isMars ? "화성" : "제주"} 운행 종료 - 리셋 처리 시작');
 
     // 운행 종료 상태로 변경
@@ -224,20 +236,30 @@ class DashboardController extends ChangeNotifier {
   void dispose() {
     Logger.log('🛑 ${isMars ? "화성" : "제주"} 대시보드 컨트롤러 종료');
 
+    // 1. 플래그 먼저 설정
+    _isDisposed = true;
+
+    // 2. 타이머들 취소
     _clockTimer?.cancel();
     _pollTimer?.cancel();
+
+    // 3. 스트림 구독 취소
     _vehicleDataSubscription?.cancel();
     _mqttConnectionSubscription?.cancel();
     _resetSubscription?.cancel();
 
+    // 4. 로그 리스너 제거
     if (_logListener != null) {
       Logger.removeListener(_logListener!);
+      _logListener = null;
     }
 
+    // 5. 서비스들 dispose (이것들이 콜백을 트리거할 수 있음)
     _mqttService.dispose();
     _stream1Service.dispose();
     _stream2Service.dispose();
 
+    // 6. 마지막에 super.dispose()
     super.dispose();
   }
 }
