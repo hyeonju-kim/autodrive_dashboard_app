@@ -63,57 +63,66 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
             color: Colors.white,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(Icons.notifications_outlined, color: Colors.white70, size: 24),
-                // 🔴 읽지 않은 알림 있을 때만 표시
-                if (_hasUnreadNotifications)
-                  Positioned(
-                    right: 3, // 아이콘 오른쪽 위로 살짝
-                    top: 3,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: const BoxDecoration(
-                        color: Colors.redAccent,
-                        shape: BoxShape.circle,
-                      ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12), // 오른쪽 전체 여백
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 알림 아이콘
+                  GestureDetector(
+                    onTap: () async {
+                      setState(() => _hasUnreadNotifications = false);
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationListScreen()),
+                      ).then((_) {
+                        _checkUnreadNotifications();
+                      });
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(Icons.notifications_outlined, color: Colors.white70, size: 24),
+                        if (_hasUnreadNotifications)
+                          Positioned(
+                            right: 3,
+                            top: 3,
+                            child: Container(
+                              width: 7,
+                              height: 7,
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-              ],
-            ),
-            onPressed: () async {
-              setState(() => _hasUnreadNotifications = false); // 버튼 누르는 즉시 빨간 점 제거
 
-              // ✅ Navigator.push() 끝나고 돌아오면 자동으로 다시 체크
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotificationListScreen()),
-              ).then((_) { // 알림 목록에서 뒤로가기 시점에 재조회 (배지 상태 일치)
-                _checkUnreadNotifications();
-              });
-            },
-          ),
+                  const SizedBox(width: 13), // 두 아이콘 사이 간격 (원하는 만큼 조절)
 
-          IconButton(
-            icon: const Icon(
-              Icons.settings,
-              color: Colors.white70,
-              size: 24,
+                  // 설정 아이콘
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
+                      );
+                    },
+                    child: const Icon(
+                      Icons.settings,
+                      color: Colors.white70,
+                      size: 24,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
-              );
-            },
-          ),
-        ],
+          ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(40),
           child: Transform.translate(
@@ -143,6 +152,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       ),
       body: TabBarView(
         controller: _tabController,
+        physics: const ClampingScrollPhysics(), // 더 민감
         children: const [
           DashboardScreen(isMars: false, hideAppBar: true), // 제주
           DashboardScreen(isMars: true, hideAppBar: true),  // 화성

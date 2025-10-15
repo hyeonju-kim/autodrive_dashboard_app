@@ -39,7 +39,7 @@ class GaugeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 90,
-      height: 100, // 높이 축소
+      height: 107,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -47,8 +47,8 @@ class GaugeWidget extends StatelessWidget {
           Text(
             '$label ($unit)',
             style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white54,
+              fontSize: 13,
+              color: Colors.white60,
               letterSpacing: 0.5,
               fontWeight: FontWeight.w500,
             ),

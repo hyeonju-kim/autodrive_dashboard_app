@@ -12,10 +12,15 @@ class Logger {
   /// 메모리 관리를 위한 최대 로그 개수
   static const int maxLogs = 100;
 
+  static bool _isDisposed = false;
+
+
   /// 새로운 로그 메시지를 추가
   /// [message]: 로그로 기록할 메시지
   /// [fileName]: 로그가 발생한 파일명 (선택적)
   static void log(String message, {String? fileName}) {
+    if (_isDisposed) return;
+
     // 현재 시간을 HH:mm:ss 형식으로 포맷
     final now = DateTime.now();
     final timeStr = '${now.hour.toString().padLeft(2, '0')}:'

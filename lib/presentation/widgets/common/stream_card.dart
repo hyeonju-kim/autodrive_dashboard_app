@@ -6,20 +6,12 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 /// 비디오 스트림을 표시하는 카드 위젯
 /// WebRTC 비디오 스트림과 연결 상태를 시각화
 class StreamCard extends StatelessWidget {
-  /// 스트림 제목 (예: Stream 11, Stream 12)
   final String title;
-
-  /// 비디오 렌더러
   final RTCVideoRenderer renderer;
-
-  /// 연결 상태
   final bool isConnected;
-
-  /// 운행 종료 상태 (추가)
-  final bool isOperationEnded;
-
-  /// 재연결 콜백 (제거해도 되지만 타입 호환성을 위해 유지)
-  final VoidCallback? onReconnect;
+  final bool isOperationEnded; /// 운행 종료 상태
+  final VoidCallback? onReconnect; /// 재연결 콜백 (제거해도 되지만 타입 호환성을 위해 유지)
+  final bool enableMirror; // 미러링 옵션 추가
 
   const StreamCard({
     super.key,
@@ -28,6 +20,7 @@ class StreamCard extends StatelessWidget {
     required this.isConnected,
     this.isOperationEnded = false, // 기본값 false
     this.onReconnect,
+    this.enableMirror = true, // 기본값 true (기존 동작 유지)
   });
 
   @override
@@ -38,7 +31,7 @@ class StreamCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          height: 215,
+          height: 224,
           color: Colors.black,
           child: Stack(
             children: [
@@ -47,7 +40,7 @@ class StreamCard extends StatelessWidget {
                 RTCVideoView(
                   renderer,
                   objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  mirror: true, // ✅ 좌우 반전 추가
+                  mirror: enableMirror, // 조건부 미러링
                 )
               else
                 Center(
@@ -151,6 +144,7 @@ class StreamCard extends StatelessWidget {
         builder: (context) => FullScreenVideo(
           renderer: renderer,
           title: title,
+          enableMirror: enableMirror, // 전달
         ),
         fullscreenDialog: true,
       ),
@@ -162,11 +156,14 @@ class StreamCard extends StatelessWidget {
 class FullScreenVideo extends StatefulWidget {
   final RTCVideoRenderer renderer;
   final String title;
+  final bool enableMirror; // 추가
+
 
   const FullScreenVideo({
     super.key,
     required this.renderer,
     required this.title,
+    this.enableMirror = true, // 추가
   });
 
   @override
@@ -208,7 +205,7 @@ class _FullScreenVideoState extends State<FullScreenVideo> {
             child: RTCVideoView(
               widget.renderer,
               objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
-              mirror: true, // 좌우 반전 추가
+              mirror: widget.enableMirror, // 조건부 미러링
             ),
           ),
 
